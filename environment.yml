@@ -1,0 +1,31 @@
+name: skies
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - scipy
+  - matplotlib
+  - scikit-learn
+  - pyproj
+  - pandas
+  - jupyterlab
+  - ipympl
+  - meshio
+  - pytest
+  - addict
+  - tqdm
+  - h5py
+  - colorcet
+  - lxml
+  - rich
+  - compilers
+  - fortran-compiler
+  - cutde
+  - ghostscript
+  - pip
+  - pip:
+      - spherical_geometry
+      - loguru
+      - okada_wrapper
+      - pygmt
+      - ismember
