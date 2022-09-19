@@ -27,8 +27,13 @@ KM2_TO_M2 = 1e6  # kilometers squared to meters squared
 KM2M = 1.0e3
 DYNECM_TO_NM = 1e-7  # dynes centimeters to Newton meters
 SHEAR_MODULUS = 3e10  # Shear modulus (Pa)
+# MINIMUM_EVENT_MOMENT_MAGNITUDE = 7.5
+# MAXIMUM_EVENT_MOMENT_MAGNITUDE = 9.5
 MINIMUM_EVENT_MOMENT_MAGNITUDE = 7.5
 MAXIMUM_EVENT_MOMENT_MAGNITUDE = 9.5
+
+MINIMUM_EVENT_MOMENT_MAGNITUDE = 9.0
+MAXIMUM_EVENT_MOMENT_MAGNITUDE = 9.0
 
 
 def create_output_folder(base_runs_folder, output_path):
@@ -285,7 +290,7 @@ def create_event(meshes, probability):
         n_earthquakes, b_value, minimum_magnitude
     )
     if event.moment_magnitude > MAXIMUM_EVENT_MOMENT_MAGNITUDE:
-        event.moment_magnitude = MAXIMUM_EVENT_MOMENT_MAGNITUDE
+        event.moment_magnitude = np.array([MAXIMUM_EVENT_MOMENT_MAGNITUDE])
 
     event.moment = 10 ** (1.5 * (event.moment_magnitude + 10.7) - 7.0)
     event.target_area = AREA_SCALING * moment_magnitude_to_area_allen_and_hayes(
