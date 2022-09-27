@@ -347,10 +347,14 @@ def get_location_probability(slip_deficit, t):
     # Map slip defict to earthquake probability
     temp_slip_deficit = np.copy(slip_deficit)
     temp_slip_deficit[temp_slip_deficit < 0.0] = 0.0
-    probability = 1 - normalized_sigmoid(1e-5, 1e-1, temp_slip_deficit)
-    probability = probability - np.min(probability)
-    probability = probability / np.max(probability)
-    probability = probability / np.sum(probability)
+    # TODO: Deal with case wither temp_slip deficit is all zeros
+    if np.min(temp_slip_deficit) == np.max(temp_slip_deficit) : 
+        probability = np.zeros_like(temp_slip_deficit)
+    else:
+        probability = 1 - normalized_sigmoid(1e-5, 1e-1, temp_slip_deficit)
+        probability = probability - np.min(probability)
+        probability = probability / np.max(probability)
+        probability = probability / np.sum(probability)
 
     print(f"{np.sum(np.isnan(temp_slip_deficit))=}")
     print(f"{np.sum(np.isnan(probability))=}")
