@@ -23,7 +23,7 @@ from .skies import (
     get_synthetic_accumulated_slip,
     plot_meshes,
     moment_magnitude_to_area_allen_and_hayes,
-    get_gutenberg_richter_magnitudes,
+    get_gutenberg_richter_magnitude,
     normalized_sigmoid,
     interpolate_and_plot,
     get_hypocenter_triangle_to_all_triangles_distances,

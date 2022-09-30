@@ -29,11 +29,11 @@ DYNECM_TO_NM = 1e-7  # dynes centimeters to Newton meters
 SHEAR_MODULUS = 3e10  # Shear modulus (Pa)
 # MINIMUM_EVENT_MOMENT_MAGNITUDE = 7.5
 # MAXIMUM_EVENT_MOMENT_MAGNITUDE = 9.5
-MINIMUM_EVENT_MOMENT_MAGNITUDE = 7.5
-MAXIMUM_EVENT_MOMENT_MAGNITUDE = 9.5
-
-MINIMUM_EVENT_MOMENT_MAGNITUDE = 9.0
+MINIMUM_EVENT_MOMENT_MAGNITUDE = 7.0
 MAXIMUM_EVENT_MOMENT_MAGNITUDE = 9.0
+
+# MINIMUM_EVENT_MOMENT_MAGNITUDE = 9.0
+# MAXIMUM_EVENT_MOMENT_MAGNITUDE = 9.0
 
 
 def create_output_folder(base_runs_folder, output_path):
@@ -283,11 +283,9 @@ def create_event(meshes, probability):
     event = addict.Dict()
 
     # Select random event magnitude from GR distribution
-    n_earthquakes = 1
     b_value = -1.0
-    minimum_magnitude = MINIMUM_EVENT_MOMENT_MAGNITUDE
-    event.moment_magnitude = get_gutenberg_richter_magnitudes(
-        n_earthquakes, b_value, minimum_magnitude
+    event.moment_magnitude = get_gutenberg_richter_magnitude(
+        b_value, MINIMUM_EVENT_MOMENT_MAGNITUDE, MAXIMUM_EVENT_MOMENT_MAGNITUDE
     )
     if event.moment_magnitude > MAXIMUM_EVENT_MOMENT_MAGNITUDE:
         event.moment_magnitude = np.array([MAXIMUM_EVENT_MOMENT_MAGNITUDE])
@@ -756,12 +754,20 @@ def moment_magnitude_to_area_allen_and_hayes(moment_magnitude):
     return area
 
 
-def get_gutenberg_richter_magnitudes(n_earthquakes, b_value, minimum_magnitude):
+def get_gutenberg_richter_magnitude(b_value, minimum_magnitude, maximum_magnitude):
+    """
+    Return a random magnitude from the Gutenberg-Ricter distribution with
+    slope b_valyue and bounded by minimum_magnitude and maximum_magnitude
+
+    TODO: Consider treatment of maximum magnitude.  Should it
+    """
     rng = np.random.RandomState()
-    magnitudes = minimum_magnitude + rng.exponential(
-        1.0 / (-b_value / np.log10(np.e)), n_earthquakes
+    magnitude = minimum_magnitude + rng.exponential(
+        1.0 / (-b_value / np.log10(np.e)), 1
     )
-    return magnitudes
+    if magnitude > maximum_magnitude:
+        magnitude = maximum_magnitude
+    return magnitude
 
 
 def normalized_sigmoid(a, b, x):
