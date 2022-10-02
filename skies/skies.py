@@ -341,7 +341,7 @@ def create_event(meshes, probability):
     return event
 
 
-def get_location_probability(slip_deficit, t):
+def get_location_probability(slip_deficit):
     # Map slip defict to earthquake probability
     temp_slip_deficit = np.copy(slip_deficit)
     temp_slip_deficit[temp_slip_deficit < 0.0] = 0.0
