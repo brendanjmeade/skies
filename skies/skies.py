@@ -287,8 +287,6 @@ def create_event(meshes, probability):
     event.moment_magnitude = get_gutenberg_richter_magnitude(
         b_value, MINIMUM_EVENT_MOMENT_MAGNITUDE, MAXIMUM_EVENT_MOMENT_MAGNITUDE
     )
-    if event.moment_magnitude > MAXIMUM_EVENT_MOMENT_MAGNITUDE:
-        event.moment_magnitude = np.array([MAXIMUM_EVENT_MOMENT_MAGNITUDE])
 
     event.moment = 10 ** (1.5 * (event.moment_magnitude + 10.7) - 7.0)
     event.target_area = AREA_SCALING * moment_magnitude_to_area_allen_and_hayes(
