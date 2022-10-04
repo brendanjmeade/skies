@@ -766,7 +766,7 @@ def get_gutenberg_richter_magnitude(b_value, minimum_magnitude, maximum_magnitud
         1.0 / (-b_value / np.log10(np.e)), 1
     )
     if magnitude > maximum_magnitude:
-        magnitude = maximum_magnitude
+        magnitude = np.array([MAXIMUM_EVENT_MOMENT_MAGNITUDE])
     return magnitude
 
 
