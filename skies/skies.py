@@ -757,16 +757,21 @@ def moment_magnitude_to_area_allen_and_hayes(moment_magnitude):
 def get_gutenberg_richter_magnitude(b_value, minimum_magnitude, maximum_magnitude):
     """
     Return a random magnitude from the Gutenberg-Ricter distribution with
-    slope b_valyue and bounded by minimum_magnitude and maximum_magnitude
+    slope b_value and bounded by minimum_magnitude and maximum_magnitude
 
-    TODO: Consider treatment of maximum magnitude.  Should it
     """
+
+    # Set an initial magnitude that is much larger than is anticipated.
+    # The purpose of this is to trigger entry into the while loop which
+    # will iterate to make sure that no evetns larger than
+    # `maximum_magnitude` are returned.
+    magnitude = 1e6
+
     rng = np.random.RandomState()
-    magnitude = minimum_magnitude + rng.exponential(
-        1.0 / (-b_value / np.log10(np.e)), 1
-    )
-    if magnitude > maximum_magnitude:
-        magnitude = np.array([MAXIMUM_EVENT_MOMENT_MAGNITUDE])
+    while magnitude > maximum_magnitude:
+        magnitude = minimum_magnitude + rng.exponential(
+            1.0 / (-b_value / np.log10(np.e)), 1
+        )
     return magnitude
 
 
