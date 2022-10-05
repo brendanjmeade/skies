@@ -1038,3 +1038,8 @@ def get_triangle_index_closest_to_hypocenter(
     # Index of mesh triangle smallest distance away
     hypocenter_triangle_index = np.argsort(distances)[0][0]
     return hypocenter_triangle_index
+
+
+def moment_magnitude_to_moment(moment_magnitude):
+    moment = 10 ** (1.5 * (moment_magnitude + 10.7) - 7.0)
+    return moment

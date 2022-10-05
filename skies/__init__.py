@@ -32,6 +32,7 @@ from .skies import (
     plot_event,
     area_to_moment_magnitude_allen_and_hayes,
     get_triangle_index_closest_to_hypocenter,
+    moment_magnitude_to_moment,
 )
 
 
