@@ -38,6 +38,7 @@ from .skies import (
     get_event_slip_single_mesh,
     get_event_area_slip_hypocenter,
     get_event_area_slip_triangle_index,
+    rbf_interpolate_single_mesh,
 )
 
 

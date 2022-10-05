@@ -541,6 +541,34 @@ def rbf_interpolate(fill_value):
     return xgrid, ygrid
 
 
+def rbf_interpolate_single_mesh(mesh, params, fill_value):
+    # Observation coordinates and data
+    x_vec = np.linspace(
+        params.min_longitude, params.max_longitude, params.n_grid_longitude
+    )
+    y_vec = np.linspace(
+        params.min_latitude, params.max_latitude, params.n_grid_latitude
+    )
+    x_mat, y_mat = np.meshgrid(x_vec, y_vec)
+    y_mat = y_mat
+    centroids_lon = mesh.centroids[:, 0]
+    centroids_lat = mesh.centroids[:, 1]
+    centroids_val = fill_value
+
+    # Package for RBFInterpolator
+    xgrid = np.stack((x_mat, y_mat))
+    xflat = xgrid.reshape(2, -1).T
+    xobs = np.vstack((centroids_lon, centroids_lat)).T
+    yobs = centroids_val
+    yflat = scipy.interpolate.RBFInterpolator(
+        xobs, yobs, kernel="cubic", smoothing=0.01, epsilon=1.5
+    )(xflat)
+    # ygrid = yflat.reshape(params.n_grid_longitude, params.n_grid_latitude)
+    ygrid = yflat.reshape(100, 100)
+
+    return xgrid, ygrid
+
+
 def get_synthetic_displacements(mesh, tri_linear_operator):
     """
     Prescribe dip-slip in a Gaussian pattern
