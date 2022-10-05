@@ -1013,3 +1013,28 @@ def area_to_moment_magnitude_allen_and_hayes(area):
         b = 0.31
     moment_magnitude = (np.log10(area / KM2_TO_M2) - a) / b
     return moment_magnitude
+
+
+def get_triangle_index_closest_to_hypocenter(
+    mesh, hypocenter_longitude, hypocenter_latitude, hypocenter_depth
+):
+    km2m = 1e3
+    radius_earth = 6371e3
+
+    # Convert hypocenter longitude, latitude, and depth to Cartesian coordinates
+    hypocenter_x, hypocenter_y, hypocenter_z = sph2cart(
+        hypocenter_longitude,
+        hypocenter_latitude,
+        radius_earth + km2m * hypocenter_depth,
+    )
+
+    # Find triangle index for triangle with centroid coordinates closest to hypocenter coordinates
+    distances = scipy.spatial.distance.cdist(
+        np.array([hypocenter_x, hypocenter_y, hypocenter_z])[None, :],
+        np.vstack((mesh.x_centroid, mesh.y_centroid, mesh.z_centroid)).T,
+        "euclidean",
+    )
+
+    # Index of mesh triangle smallest distance away
+    hypocenter_triangle_index = np.argsort(distances)[0][0]
+    return hypocenter_triangle_index
