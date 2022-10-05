@@ -33,6 +33,11 @@ from .skies import (
     area_to_moment_magnitude_allen_and_hayes,
     get_triangle_index_closest_to_hypocenter,
     moment_magnitude_to_moment,
+    get_hypocenter_triangle_to_all_triangles_distances_single_mesh,
+    get_event_area_and_mean_slip,
+    get_event_slip_single_mesh,
+    get_event_area_slip_hypocenter,
+    get_event_area_slip_triangle_index,
 )
 
 

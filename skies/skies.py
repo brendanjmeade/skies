@@ -847,6 +847,39 @@ def get_hypocenter_triangle_to_all_triangles_distances(meshes, event):
     return hypocenter_triangle_to_all_triangles_distances
 
 
+def get_hypocenter_triangle_to_all_triangles_distances_single_mesh(
+    mesh, hypocenter_triangle_index
+):
+    # Find distance between current index mesh triangle all others
+    x_centroid = mesh.x_centroid[hypocenter_triangle_index] - mesh.x_centroid
+    y_centroid = mesh.y_centroid[hypocenter_triangle_index] - mesh.y_centroid
+    z_centroid = mesh.z_centroid[hypocenter_triangle_index] - mesh.z_centroid
+
+    all_triangle_cartesian_centroid_coordinates = np.vstack(
+        (x_centroid, y_centroid, z_centroid)
+    ).T
+
+    hypocenter_triangle_cartesian_centroid_coordinates = np.array(
+        [
+            x_centroid[hypocenter_triangle_index],
+            y_centroid[hypocenter_triangle_index],
+            z_centroid[hypocenter_triangle_index],
+        ]
+    )[None, :]
+
+    hypocenter_triangle_to_all_triangles_distances = scipy.spatial.distance.cdist(
+        hypocenter_triangle_cartesian_centroid_coordinates,
+        all_triangle_cartesian_centroid_coordinates,
+        "euclidean",
+    )
+
+    hypocenter_triangle_to_all_triangles_distances = np.squeeze(
+        hypocenter_triangle_to_all_triangles_distances
+    )
+
+    return hypocenter_triangle_to_all_triangles_distances
+
+
 def get_event_slip(meshes, event, eigenvalues, eigenvectors):
     event.slip = np.zeros(event.triangle_index.size)
     weights = np.random.randn(eigenvalues.size)
@@ -1043,3 +1076,88 @@ def get_triangle_index_closest_to_hypocenter(
 def moment_magnitude_to_moment(moment_magnitude):
     moment = 10 ** (1.5 * (moment_magnitude + 10.7) - 7.0)
     return moment
+
+
+def get_event_area_and_mean_slip(mesh, event):
+    # Calculate distance from hypocenter triangle toto all other triangles
+    event.hypocenter_triangle_to_all_triangles_distances = (
+        get_hypocenter_triangle_to_all_triangles_distances_single_mesh(
+            mesh, event.hypocenter_triangle_index
+        )
+    )
+
+    # Find the triangles close to the hypocenter that accumulate enough area to be a
+    # part of the event rupture
+    sorted_distance_index = np.argsort(
+        event.hypocenter_triangle_to_all_triangles_distances
+    )
+    cumulative_area = np.cumsum(mesh.areas[sorted_distance_index])
+    event.triangle_index = sorted_distance_index[
+        np.where(cumulative_area < event.target_area)[0]
+    ]
+    event.actual_area = np.sum(mesh.areas[event.triangle_index])
+    event.mean_slip = event.moment / (event.shear_modulus * event.actual_area)
+    return event
+
+
+def get_event_slip_single_mesh(mesh, event):
+    event.n_eigenvalues = event.triangle_index.size
+    eigenvalues, eigenvectors = get_eigenvalues_and_eigenvectors(
+        event.n_eigenvalues,
+        (mesh.x_centroid[event.hypocenter_triangle_index] - mesh.x_centroid)[
+            event.triangle_index
+        ],
+        (mesh.y_centroid[event.hypocenter_triangle_index] - mesh.y_centroid)[
+            event.triangle_index
+        ],
+        (mesh.z_centroid[event.hypocenter_triangle_index] - mesh.z_centroid)[
+            event.triangle_index
+        ],
+    )
+
+    event.slip = np.zeros(event.triangle_index.size)
+    weights = np.random.randn(eigenvalues.size)
+    for i in range(1, weights.size):
+        event.slip += weights[i] * np.sqrt(eigenvalues[i]) * eigenvectors[:, i]
+    event.slip = np.exp(event.slip)
+
+    # Apply taper to slip.  This is ad hoc and may need revision
+    distances = event.hypocenter_triangle_to_all_triangles_distances[
+        event.triangle_index
+    ]
+    taper_transition = 1.5 * np.mean(distances)
+    taper_width = 10 / taper_transition  # (m)
+    slip_taper = normalized_sigmoid(taper_transition, taper_width, distances)
+    event.slip = event.slip * slip_taper
+
+    # After taper is applied rescale slip magnitudes to get the correct moment
+    event.pre_scaled_moment = event.shear_modulus * np.sum(
+        event.slip * mesh.areas[event.triangle_index]
+    )
+    event.slip_scaling_factor = event.moment / event.pre_scaled_moment
+    event.slip = event.slip * event.slip_scaling_factor
+    event.slip_all_elements = np.zeros(mesh.n_tde)
+    event.slip_all_elements[event.triangle_index] = event.slip
+    event.geometric_moment = mesh.areas * event.slip_all_elements
+    return event
+
+
+def get_event_area_slip_hypocenter(mesh, event):
+    event.hypocenter_triangle_index = get_triangle_index_closest_to_hypocenter(
+        mesh,
+        event.hypocenter_longitude,
+        event.hypocenter_latitude,
+        event.hypocenter_depth,
+    )
+    event = get_event_area_slip_triangle_index(mesh, event)
+    return event
+
+
+def get_event_area_slip_triangle_index(mesh, event):
+    event.moment = moment_magnitude_to_moment(event.moment_magnitude)
+    event.target_area = event.area_scaling * moment_magnitude_to_area_allen_and_hayes(
+        event.moment_magnitude
+    )
+    event = get_event_area_and_mean_slip(mesh, event)
+    event = get_event_slip_single_mesh(mesh, event)
+    return event
