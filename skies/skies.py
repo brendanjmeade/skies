@@ -1,6 +1,4 @@
 import addict
-import copy
-import datetime
 import json
 import meshio
 import os
@@ -8,11 +6,8 @@ import warnings
 import scipy
 import numpy as np
 import matplotlib.pyplot as plt
-from importlib import reload
-from pprint import pprint
 from ismember import ismember
 import matplotlib
-
 
 # Constants and parameters
 N_GRID_X = 500
@@ -27,13 +22,8 @@ KM2_TO_M2 = 1e6  # kilometers squared to meters squared
 KM2M = 1.0e3
 DYNECM_TO_NM = 1e-7  # dynes centimeters to Newton meters
 SHEAR_MODULUS = 3e10  # Shear modulus (Pa)
-# MINIMUM_EVENT_MOMENT_MAGNITUDE = 7.5
-# MAXIMUM_EVENT_MOMENT_MAGNITUDE = 9.5
 MINIMUM_EVENT_MOMENT_MAGNITUDE = 7.0
 MAXIMUM_EVENT_MOMENT_MAGNITUDE = 9.0
-
-# MINIMUM_EVENT_MOMENT_MAGNITUDE = 9.0
-# MAXIMUM_EVENT_MOMENT_MAGNITUDE = 9.0
 
 
 def create_output_folder(base_runs_folder, output_path):
@@ -1009,10 +999,10 @@ def area_to_moment_magnitude_allen_and_hayes(area):
     Note: $S_2$ in the paper's notation is what we use for rupture_area
 
     Args:
-        moment_magnitude: Array of moment magnitudes
+        area: rupture area in meters squared
 
     Returns:
-        area: rupture area in meters squared
+        moment_magnitude: Array of moment magnitudes
     """
     hinge_area = 80714792455.11925  # (m)
     if area <= hinge_area:
