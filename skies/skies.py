@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ismember import ismember
 import matplotlib
+from scipy.interpolate import SmoothBivariateSpline
 
 # Constants and parameters
 N_GRID_X = 500
@@ -550,7 +551,7 @@ def rbf_interpolate_single_mesh(mesh, params, fill_value):
         params.min_latitude, params.max_latitude, params.n_grid_latitude
     )
     x_mat, y_mat = np.meshgrid(x_vec, y_vec)
-    y_mat = y_mat
+    # y_mat = y_mat
     centroids_lon = mesh.centroids[:, 0]
     centroids_lat = mesh.centroids[:, 1]
     centroids_val = fill_value
@@ -563,9 +564,33 @@ def rbf_interpolate_single_mesh(mesh, params, fill_value):
     yflat = scipy.interpolate.RBFInterpolator(
         xobs, yobs, kernel="cubic", smoothing=0.01, epsilon=1.5
     )(xflat)
-    # ygrid = yflat.reshape(params.n_grid_longitude, params.n_grid_latitude)
-    ygrid = yflat.reshape(100, 100)
+    ygrid = yflat.reshape(params.n_grid_longitude, params.n_grid_latitude)
+    return xgrid, ygrid
 
+
+def smooth_bivariate_spline_interpolate_single_mesh(mesh, params, fill_value):
+    # Observation coordinates and data
+    x_vec = np.linspace(
+        params.min_longitude, params.max_longitude, params.n_grid_longitude
+    )
+    y_vec = np.linspace(
+        params.min_latitude, params.max_latitude, params.n_grid_latitude
+    )
+    x_mat, y_mat = np.meshgrid(x_vec, y_vec)
+    # y_mat = y_mat
+    centroids_lon = mesh.centroids[:, 0]
+    centroids_lat = mesh.centroids[:, 1]
+    centroids_val = fill_value
+
+    # Package for SmoothBivariateSpline
+    xgrid = np.stack((x_mat, y_mat))
+    xflat = xgrid.reshape(2, -1).T
+    xobs = np.vstack((centroids_lon, centroids_lat)).T
+    yobs = centroids_val
+    yflat = scipy.interpolate.RBFInterpolator(
+        xobs, yobs, kernel="cubic", smoothing=0.01, epsilon=1.5
+    )(xflat)
+    ygrid = yflat.reshape(params.n_grid_longitude, params.n_grid_latitude)
     return xgrid, ygrid
 
 
