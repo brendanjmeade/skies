@@ -1,14 +1,19 @@
 import addict
+import datetime
 import json
 import meshio
 import os
+import uuid
 import warnings
 import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 from ismember import ismember
 import matplotlib
-from scipy.interpolate import SmoothBivariateSpline
+
+# from scipy.interpolate import SmoothBivariateSpline
+import colorcet as cc
+
 
 # Constants and parameters
 N_GRID_X = 500
@@ -1166,6 +1171,7 @@ def get_event_slip_single_mesh(mesh, event):
     event.slip_all_elements = np.zeros(mesh.n_tde)
     event.slip_all_elements[event.triangle_index] = event.slip
     event.geometric_moment = mesh.areas * event.slip_all_elements
+    event.scalar_geometric_moment = np.sum(event.geometric_moment)
     return event
 
 
@@ -1188,3 +1194,183 @@ def get_event_area_slip_triangle_index(mesh, event):
     event = get_event_area_and_mean_slip(mesh, event)
     event = get_event_slip_single_mesh(mesh, event)
     return event
+
+
+def get_datetime_uuid_string():
+    return (
+        str(
+            (
+                datetime.datetime.now() - datetime.datetime.fromtimestamp(0)
+            ).total_seconds()
+        ).replace(".", "")
+        + uuid.uuid4().hex
+    )
+
+
+def quick_plot_slip(mesh, event, params):
+    plt.figure(figsize=(8, 8))
+    fill_value = event.slip_all_elements
+    xgrid, ygrid = rbf_interpolate_single_mesh(mesh, params, fill_value)
+    xflat = xgrid.reshape(2, -1).T
+    inpolygon_vals = inpolygon(
+        xflat[:, 0], xflat[:, 1], mesh.x_perimeter, mesh.y_perimeter
+    )
+    inpolygon_vals = np.reshape(
+        inpolygon_vals, (params.n_grid_longitude, params.n_grid_latitude)
+    )
+    ygrid[~inpolygon_vals] = np.nan
+
+    # Plot
+    cmap = cc.cm.CET_L19
+    levels = np.linspace(0.1, np.floor(np.nanmax(ygrid)), params.n_contour_levels)
+    plt.contourf(*xgrid, ygrid, cmap=cmap, levels=levels, extend="both")
+    cb = plt.colorbar(
+        cax=plt.gca().inset_axes((0.05, 0.05, 0.03, 0.25)), label="slip (m)"
+    )
+    cb.set_label(label="slip (m)", size=10)
+    cb.ax.tick_params(labelsize=10)
+    plt.contour(
+        *xgrid,
+        ygrid,
+        colors="k",
+        linestyles="solid",
+        linewidths=0.25,
+        levels=levels,
+    )
+    plt.plot(mesh.x_perimeter, mesh.y_perimeter, "-k", linewidth=1.0)
+    plt.gca().set_aspect("equal", adjustable="box")
+    plt.gca().set_facecolor("gainsboro")
+    plt.title(f"$M_W$ = {event.moment_magnitude:0.3}")
+    if params.savefig:
+        base_file_name = "./runs/" + params.run_name + "/" + get_datetime_uuid_string()
+        plt.savefig(base_file_name + ".pdf")
+        plt.savefig(base_file_name + ".png", dpi=500)
+    plt.show()
+
+
+def plot_event_select_eigenmodes(mesh, event, params):
+    # Show eigenmodes for this event
+    event.n_eigenvalues = event.triangle_index.size
+    print(f"Number of triangle mesh elements = {mesh.n_tde}")
+    print(f"Number of eigenvalues = {event.n_eigenvalues}")
+
+    # Use Karhunen-Loeve to compute eigenvalues and eigenvectors
+    eigenvalues, eigenvectors = get_eigenvalues_and_eigenvectors(
+        event.n_eigenvalues,
+        (mesh.x_centroid[event.hypocenter_triangle_index] - mesh.x_centroid)[
+            event.triangle_index
+        ],
+        (mesh.y_centroid[event.hypocenter_triangle_index] - mesh.y_centroid)[
+            event.triangle_index
+        ],
+        (mesh.z_centroid[event.hypocenter_triangle_index] - mesh.z_centroid)[
+            event.triangle_index
+        ],
+    )
+
+    # def quick_plot_mode(mesh, fill_value, params):
+    #     xgrid, ygrid = rbf_interpolate_single_mesh(mesh, params, fill_value)
+    #     xflat = xgrid.reshape(2, -1).T
+    #     inpolygon_vals = inpolygon(
+    #         xflat[:, 0], xflat[:, 1], mesh.x_perimeter, mesh.y_perimeter
+    #     )
+    #     inpolygon_vals = np.reshape(
+    #         inpolygon_vals, (params.n_grid_longitude, params.n_grid_latitude)
+    #     )
+    #     ygrid[~inpolygon_vals] = np.nan
+
+    #     # Filled contour plot
+    #     cmap = cc.cm.CET_D10
+    #     levels = np.linspace(-1.0, 1.0, 10)
+    #     plt.contourf(*xgrid, ygrid, cmap=cmap, levels=levels, extend="both")
+    #     plt.contour(
+    #         *xgrid,
+    #         ygrid,
+    #         colors="k",
+    #         linestyles="solid",
+    #         linewidths=0.25,
+    #         levels=levels,
+    #     )
+    #     plt.plot(mesh.x_perimeter, mesh.y_perimeter, "-k", linewidth=1.0)
+    #     plt.xticks([])
+    #     plt.yticks([])
+    #     plt.gca().set_facecolor("gainsboro")
+    #     plt.gca().set_aspect("equal", adjustable="box")
+
+    # Plot select eigenmodes
+    plt.figure(figsize=(12, 8))
+    for i in range(0, 10):
+        ax = plt.subplot(2, 5, i + 1)
+
+        # Select eigenmode for current index
+        n_eigenvalues = eigenvalues.size
+        if n_eigenvalues > 55:
+            if i >= 5:
+                i = i + 50 - 5
+        elif n_eigenvalues >= 10 and n_eigenvalues < 55:
+            if i >= 5:
+                i = n_eigenvalues - 5 + (i - 5)
+        elif n_eigenvalues < 10:
+            if i > n_eigenvalues:
+                break
+        print(f"Plotting mode {i}")
+
+        # Select eigenmode to contour
+        fill_value = np.zeros(mesh.n_tde)
+        fill_value[event.triangle_index] = eigenvectors[:, i]
+
+        # Normalize eigenmode for interpretable plotting
+        min_value = np.min(fill_value)
+        max_value = np.max(fill_value)
+        if np.abs(max_value) > np.abs(min_value):
+            fill_value = fill_value / max_value
+        else:
+            fill_value = fill_value / np.abs(min_value)
+
+        # Sign convetion for special case of first eigenmode
+        if i == 0 and np.nanmean(fill_value) < 0:
+            fill_value = -1 * fill_value
+
+        # Plot and title
+        quick_plot_mode(mesh, fill_value, params)
+        plt.title(f"mode {i} of {n_eigenvalues}")
+
+        # Save as .pdf and .png
+        if params.savefig:
+            base_file_name = (
+                "./runs/" + params.run_name + "/" + get_datetime_uuid_string()
+            )
+            plt.savefig(base_file_name + ".pdf")
+            plt.savefig(base_file_name + ".png", dpi=500)
+
+    plt.show()
+
+
+def quick_plot_mode(mesh, fill_value, params):
+    xgrid, ygrid = rbf_interpolate_single_mesh(mesh, params, fill_value)
+    xflat = xgrid.reshape(2, -1).T
+    inpolygon_vals = inpolygon(
+        xflat[:, 0], xflat[:, 1], mesh.x_perimeter, mesh.y_perimeter
+    )
+    inpolygon_vals = np.reshape(
+        inpolygon_vals, (params.n_grid_longitude, params.n_grid_latitude)
+    )
+    ygrid[~inpolygon_vals] = np.nan
+
+    # Filled contour plot
+    cmap = cc.cm.CET_D10
+    levels = np.linspace(-1.0, 1.0, 10)
+    plt.contourf(*xgrid, ygrid, cmap=cmap, levels=levels, extend="both")
+    plt.contour(
+        *xgrid,
+        ygrid,
+        colors="k",
+        linestyles="solid",
+        linewidths=0.25,
+        levels=levels,
+    )
+    plt.plot(mesh.x_perimeter, mesh.y_perimeter, "-k", linewidth=1.0)
+    plt.xticks([])
+    plt.yticks([])
+    plt.gca().set_facecolor("gainsboro")
+    plt.gca().set_aspect("equal", adjustable="box")

@@ -39,6 +39,10 @@ from .skies import (
     get_event_area_slip_hypocenter,
     get_event_area_slip_triangle_index,
     rbf_interpolate_single_mesh,
+    get_datetime_uuid_string,
+    quick_plot_slip,
+    plot_event_select_eigenmodes,
+    quick_plot_mode,
 )
 
 
