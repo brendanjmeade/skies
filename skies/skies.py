@@ -254,24 +254,24 @@ def print_magnitude_overview(meshes):
     print(
         f"Minimum moment magnitude of single mesh element = {minimum_single_triangle_moment_magnitude:0.2f}"
     )
-    print(f"Maximum allowed moment magnitude = {MAXIMUM_EVENT_MOMENT_MAGNITUDE:0.2f}")
-    print(f"Minimum allowed moment magnitude = {MINIMUM_EVENT_MOMENT_MAGNITUDE:0.2f}")
+    # print(f"Maximum allowed moment magnitude = {MAXIMUM_EVENT_MOMENT_MAGNITUDE:0.2f}")
+    # print(f"Minimum allowed moment magnitude = {MINIMUM_EVENT_MOMENT_MAGNITUDE:0.2f}")
 
-    if MINIMUM_EVENT_MOMENT_MAGNITUDE < minimum_single_triangle_moment_magnitude:
-        print(
-            "MINIMUM_EVENT_MOMENT_MAGNITUDE is less than minimum moment magnitude of single mesh"
-        )
-        print(
-            "WARNING: To avoid subgrid scale events increase MINIMUM_EVENT_MOMENT_MAGNITUDE"
-        )
+    # if MINIMUM_EVENT_MOMENT_MAGNITUDE < minimum_single_triangle_moment_magnitude:
+    #     print(
+    #         "MINIMUM_EVENT_MOMENT_MAGNITUDE is less than minimum moment magnitude of single mesh"
+    #     )
+    #     print(
+    #         "WARNING: To avoid subgrid scale events increase MINIMUM_EVENT_MOMENT_MAGNITUDE"
+    #     )
 
-    if maximum_moment_magnitude > MAXIMUM_EVENT_MOMENT_MAGNITUDE:
-        print(
-            f"Maximum moment magnitude of entire mesh ({maximum_moment_magnitude:0.2f}) exceeds MAXIMUM_EVENT_MOMENT_MAGNITUDE"
-        )
-        print(
-            f"WARNING: Events larger than {MAXIMUM_EVENT_MOMENT_MAGNITUDE:0.2f} will be clipped to {MAXIMUM_EVENT_MOMENT_MAGNITUDE:0.2f}"
-        )
+    # if maximum_moment_magnitude > MAXIMUM_EVENT_MOMENT_MAGNITUDE:
+    #     print(
+    #         f"Maximum moment magnitude of entire mesh ({maximum_moment_magnitude:0.2f}) exceeds MAXIMUM_EVENT_MOMENT_MAGNITUDE"
+    #     )
+    #     print(
+    #         f"WARNING: Events larger than {MAXIMUM_EVENT_MOMENT_MAGNITUDE:0.2f} will be clipped to {MAXIMUM_EVENT_MOMENT_MAGNITUDE:0.2f}"
+    #     )
 
 
 def create_event(meshes, probability):
@@ -1111,56 +1111,77 @@ def moment_magnitude_to_moment(moment_magnitude):
 
 
 def get_event_area_and_mean_slip(mesh, event):
-    # Calculate distance from hypocenter triangle toto all other triangles
-    event.hypocenter_triangle_to_all_triangles_distances = (
-        get_hypocenter_triangle_to_all_triangles_distances_single_mesh(
-            mesh, event.hypocenter_triangle_index
-        )
-    )
 
-    # Find the triangles close to the hypocenter that accumulate enough area to be a
-    # part of the event rupture
-    sorted_distance_index = np.argsort(
-        event.hypocenter_triangle_to_all_triangles_distances
-    )
-    cumulative_area = np.cumsum(mesh.areas[sorted_distance_index])
-    event.triangle_index = sorted_distance_index[
-        np.where(cumulative_area < event.target_area)[0]
-    ]
-    event.actual_area = np.sum(mesh.areas[event.triangle_index])
+    # In the case where event area larger than the area of the hypocentral triangle
+    # then just have uniform slip on the single hypocentral triangle
+    if event.target_area <= event.hypocenter_triangle_area:
+        print("Target area is less than hypocenter triangle area")
+        event.actual_area = event.hypocenter_triangle_area
+        event.triangle_index = event.hypocenter_triangle_index
+        event.hypocenter_triangle_to_all_triangles_distances = np.array([])
+
+    elif event.target_area > event.hypocenter_triangle_area:
+        # Calculate distance from hypocenter triangle to all other triangles
+        event.hypocenter_triangle_to_all_triangles_distances = (
+            get_hypocenter_triangle_to_all_triangles_distances_single_mesh(
+                mesh, event.hypocenter_triangle_index
+            )
+        )
+
+        # Find the triangles close to the hypocenter that accumulate enough area to be a
+        # part of the event rupture
+        sorted_distance_index = np.argsort(
+            event.hypocenter_triangle_to_all_triangles_distances
+        )
+        cumulative_area = np.cumsum(mesh.areas[sorted_distance_index])
+        event.triangle_index = sorted_distance_index[
+            np.where(cumulative_area < event.target_area)[0]
+        ]
+        event.actual_area = np.sum(mesh.areas[event.triangle_index])
+
+    # Rescale slip
     event.mean_slip = event.moment / (event.shear_modulus * event.actual_area)
     return event
 
 
 def get_event_slip_single_mesh(mesh, event):
-    event.n_eigenvalues = event.triangle_index.size
-    eigenvalues, eigenvectors = get_eigenvalues_and_eigenvectors(
-        event.n_eigenvalues,
-        (mesh.x_centroid[event.hypocenter_triangle_index] - mesh.x_centroid)[
-            event.triangle_index
-        ],
-        (mesh.y_centroid[event.hypocenter_triangle_index] - mesh.y_centroid)[
-            event.triangle_index
-        ],
-        (mesh.z_centroid[event.hypocenter_triangle_index] - mesh.z_centroid)[
-            event.triangle_index
-        ],
-    )
 
-    event.slip = np.zeros(event.triangle_index.size)
-    weights = np.random.randn(eigenvalues.size)
-    for i in range(1, weights.size):
-        event.slip += weights[i] * np.sqrt(eigenvalues[i]) * eigenvectors[:, i]
-    event.slip = np.exp(event.slip)
+    if event.target_area <= event.hypocenter_triangle_area:
+        event.n_eigenvalues = 0
+        event.slip = event.moment / (
+            event.shear_modulus * event.hypocenter_triangle_area
+        )
+        event.pre_scaled_moment = np.copy(event.moment)
 
-    # Apply taper to slip.  This is ad hoc and may need revision
-    distances = event.hypocenter_triangle_to_all_triangles_distances[
-        event.triangle_index
-    ]
-    taper_transition = 1.5 * np.mean(distances)
-    taper_width = 10 / taper_transition  # (m)
-    slip_taper = normalized_sigmoid(taper_transition, taper_width, distances)
-    event.slip = event.slip * slip_taper
+    if event.target_area > event.hypocenter_triangle_area:
+        event.n_eigenvalues = event.triangle_index.size
+        eigenvalues, eigenvectors = get_eigenvalues_and_eigenvectors(
+            event.n_eigenvalues,
+            (mesh.x_centroid[event.hypocenter_triangle_index] - mesh.x_centroid)[
+                event.triangle_index
+            ],
+            (mesh.y_centroid[event.hypocenter_triangle_index] - mesh.y_centroid)[
+                event.triangle_index
+            ],
+            (mesh.z_centroid[event.hypocenter_triangle_index] - mesh.z_centroid)[
+                event.triangle_index
+            ],
+        )
+
+        event.slip = np.zeros(event.triangle_index.size)
+        weights = np.random.randn(eigenvalues.size)
+        for i in range(1, weights.size):
+            event.slip += weights[i] * np.sqrt(eigenvalues[i]) * eigenvectors[:, i]
+        event.slip = np.exp(event.slip)
+
+        # Apply taper to slip.  This is ad hoc and may need revision
+        distances = event.hypocenter_triangle_to_all_triangles_distances[
+            event.triangle_index
+        ]
+        taper_transition = 1.5 * np.mean(distances)
+        taper_width = 10 / taper_transition  # (m)
+        slip_taper = normalized_sigmoid(taper_transition, taper_width, distances)
+        event.slip = event.slip * slip_taper
 
     # After taper is applied rescale slip magnitudes to get the correct moment
     event.pre_scaled_moment = event.shear_modulus * np.sum(
@@ -1191,6 +1212,8 @@ def get_event_area_slip_triangle_index(mesh, event):
     event.target_area = event.area_scaling * moment_magnitude_to_area_allen_and_hayes(
         event.moment_magnitude
     )
+    event.hypocenter_triangle_area = mesh.areas[event.hypocenter_triangle_index]
+
     event = get_event_area_and_mean_slip(mesh, event)
     event = get_event_slip_single_mesh(mesh, event)
     return event
@@ -1222,7 +1245,10 @@ def quick_plot_slip(mesh, event, params):
 
     # Plot
     cmap = cc.cm.CET_L19
-    levels = np.linspace(0.1, np.floor(np.nanmax(ygrid)), params.n_contour_levels)
+    levels = np.linspace(
+        params.min_contour_value, np.nanmax(ygrid), params.n_contour_levels
+    )
+
     plt.contourf(*xgrid, ygrid, cmap=cmap, levels=levels, extend="both")
     cb = plt.colorbar(
         cax=plt.gca().inset_axes((0.05, 0.05, 0.03, 0.25)), label="slip (m)"
