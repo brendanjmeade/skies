@@ -1,6 +1,6 @@
 [
   {
-    "mesh_filename": "../data/mesh/nankai.msh",
+    "mesh_filename": "nankai.msh",
     "smoothing_weight": 1e14,
     "top_slip_rate_constraint": 1,
     "bot_slip_rate_constraint": 1,

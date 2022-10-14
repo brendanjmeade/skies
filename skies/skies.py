@@ -1251,7 +1251,7 @@ def quick_plot_slip(mesh, event, params):
 
     plt.contourf(*xgrid, ygrid, cmap=cmap, levels=levels, extend="both")
     cb = plt.colorbar(
-        cax=plt.gca().inset_axes((0.05, 0.05, 0.03, 0.25)), label="slip (m)"
+        cax=plt.gca().inset_axes((0.03, 0.60, 0.02, 0.35)), label="slip (m)"
     )
     cb.set_label(label="slip (m)", size=10)
     cb.ax.tick_params(labelsize=10)
