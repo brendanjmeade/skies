@@ -1337,7 +1337,7 @@ def plot_event_select_eigenmodes(mesh, event, params):
             if i >= 5:
                 i = n_eigenvalues - 5 + (i - 5)
         elif n_eigenvalues < 10:
-            if i > n_eigenvalues:
+            if i >= n_eigenvalues:
                 break
         print(f"Plotting mode {i}")
 
