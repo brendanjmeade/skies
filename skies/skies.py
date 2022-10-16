@@ -567,7 +567,7 @@ def rbf_interpolate_single_mesh(mesh, params, fill_value):
     xobs = np.vstack((centroids_lon, centroids_lat)).T
     yobs = centroids_val
     yflat = scipy.interpolate.RBFInterpolator(
-        xobs, yobs, kernel="cubic", smoothing=0.001, epsilon=1.5
+        xobs, yobs, kernel="cubic", smoothing=0.0000, epsilon=1.0
     )(xflat)
     ygrid = yflat.reshape(params.n_grid_longitude, params.n_grid_latitude)
     return xgrid, ygrid
@@ -1324,7 +1324,7 @@ def plot_event_select_eigenmodes(mesh, event, params):
     #     plt.gca().set_aspect("equal", adjustable="box")
 
     # Plot select eigenmodes
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(12, 4))
     for i in range(0, 10):
         ax = plt.subplot(2, 5, i + 1)
 
