@@ -802,8 +802,9 @@ def normalized_sigmoid(a, b, x):
     Function parameters a = center; b = width
     https://stackoverflow.com/questions/3985619/how-to-calculate-a-logistic-sigmoid-function-in-python
     """
-    s = 1 / (1 + np.exp(b * (x - a)))
-    return 1 * (s - np.min(s)) / (np.max(s) - np.min(s))  # normalize function to 0-1
+    s = 1 / (1 + np.exp(b * -(x - a)))
+    s = 1 * (s - np.min(s)) / (np.max(s) - np.min(s))  # normalize function to 0-1
+    return s
 
 
 # Visualize eigenvectors
