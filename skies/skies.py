@@ -1112,7 +1112,6 @@ def moment_magnitude_to_moment(moment_magnitude):
 
 
 def get_event_area_and_mean_slip(mesh, event):
-
     # In the case where event area larger than the area of the hypocentral triangle
     # then just have uniform slip on the single hypocentral triangle
     if event.target_area <= event.hypocenter_triangle_area:
