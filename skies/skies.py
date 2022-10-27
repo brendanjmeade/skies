@@ -979,16 +979,21 @@ def plot_event(
     # Plot pre-earthquake slip deficit
     plt.subplot(1, 6, 1)
     pc = plot_meshes(meshes, pre_event_slip_deficit, plt.gca(), "spring")
-    plt.colorbar(pc, label="initial slip deficit (m)")
+    plt.colorbar(pc, format="%.0e")
+    # plt.colorbar(pc, label="initial slip deficit (m)")
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
-    plt.title(f"pre-earthquake slip deficit")
+    plt.xticks([])
+    plt.yticks([])
+    plt.title("pre-eq $\hat{m}$")
 
     # Plot current probability
     plt.subplot(1, 6, 2)
     pc = plot_meshes(meshes, probability, plt.gca(), "viridis")
-    plt.colorbar(pc, label="initial slip deficit (m)")
+    plt.colorbar(pc, format="%.0e")
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
-    plt.title(f"probability")
+    plt.xticks([])
+    plt.yticks([])
+    plt.title(f"weights")
 
     plt.subplot(1, 6, 3)
     pc = plot_meshes(
@@ -997,7 +1002,7 @@ def plot_event(
         plt.gca(),
         "Reds",
     )
-    plt.colorbar(pc, label="distance to hypocenter triangle")
+    plt.colorbar(pc, format="%.0e")
     plt.plot(
         meshes[0].centroids[event.hypocenter_triangle_index, 0],
         meshes[0].centroids[event.hypocenter_triangle_index, 1],
@@ -1005,6 +1010,9 @@ def plot_event(
         markersize=15,
     )
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
+    plt.xticks([])
+    plt.yticks([])
+    plt.title(f"i = {iteration_step}")
     # plt.title(f"index = {event.hypocenter_triangle_index[0]}")
 
     # Plot triangles involved in current event
@@ -1012,8 +1020,10 @@ def plot_event(
     fill_value = np.zeros(meshes[0].n_tde)
     fill_value[event.triangle_index] = 1
     pc = plot_meshes(meshes, fill_value, plt.gca(), "Blues")
-    plt.colorbar(pc, label="event triangles")
+    plt.colorbar(pc, format="%.0e")
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
+    plt.xticks([])
+    plt.yticks([])
     plt.title(f"{event.actual_area / KM2_TO_M2:0.2f} (km^2)")
 
     # Plot slip distribution
@@ -1038,16 +1048,20 @@ def plot_event(
     ax.autoscale()
     plt.gca().set_aspect("equal")
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
-    plt.colorbar(pc, label="slip (m)")
-    plt.title(f"M_W = {event.moment_magnitude[0]:0.3}")
+    plt.colorbar(pc, format="%.0e")
+    plt.xticks([])
+    plt.yticks([])
+    plt.title(f"$M_W$ = {event.moment_magnitude[0]:0.2f}")
 
     plt.subplot(1, 6, 6)
     pc = plot_meshes(meshes, post_event_slip_deficit, plt.gca(), "spring")
-    plt.colorbar(pc, label="slip deficit (m)")
+    plt.colorbar(pc, format="%.0e")
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
-    plt.title(f"post-earthquake slip deficit")
+    plt.xticks([])
+    plt.yticks([])
+    plt.title("post-eq $\hat{m}$")
 
-    plt.suptitle(f"{iteration_step=}, {t=}")
+    # plt.suptitle(f"i = {iteration_step}")
     plt.show()
 
 
