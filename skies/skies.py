@@ -1178,9 +1178,14 @@ def get_event_slip_single_mesh(mesh, event):
         distances = event.hypocenter_triangle_to_all_triangles_distances[
             event.triangle_index
         ]
-        taper_transition = 1.5 * np.mean(distances)
-        taper_width = 10 / taper_transition  # (m)
-        slip_taper = normalized_sigmoid(taper_transition, taper_width, distances)
+
+        # Sigmoid taper: M
+        # taper_transition = 1.5 * np.mean(distances)
+        # taper_width = 10 / taper_transition  # (m)
+        # slip_taper = normalized_sigmoid(taper_transition, taper_width, distances)
+
+        # Cosine taper
+        slip_taper = np.cos(np.pi / 2 * distances / np.max(distances))
         event.slip = event.slip * slip_taper
 
     # After taper is applied rescale slip magnitudes to get the correct moment
