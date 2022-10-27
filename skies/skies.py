@@ -978,14 +978,14 @@ def plot_event(
 
     # Plot pre-earthquake slip deficit
     plt.subplot(1, 6, 1)
-    pc = plot_meshes(meshes, pre_event_slip_deficit, plt.gca(), "magma_r")
+    pc = plot_meshes(meshes, pre_event_slip_deficit, plt.gca(), "spring")
     plt.colorbar(pc, label="initial slip deficit (m)")
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
     plt.title(f"pre-earthquake slip deficit")
 
     # Plot current probability
     plt.subplot(1, 6, 2)
-    pc = plot_meshes(meshes, probability, plt.gca(), "viridis_r")
+    pc = plot_meshes(meshes, probability, plt.gca(), "viridis")
     plt.colorbar(pc, label="initial slip deficit (m)")
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
     plt.title(f"probability")
@@ -1005,7 +1005,7 @@ def plot_event(
         markersize=15,
     )
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
-    plt.title(f"index = {event.hypocenter_triangle_index[0]}")
+    # plt.title(f"index = {event.hypocenter_triangle_index[0]}")
 
     # Plot triangles involved in current event
     plt.subplot(1, 6, 4)
@@ -1042,7 +1042,7 @@ def plot_event(
     plt.title(f"M_W = {event.moment_magnitude[0]:0.3}")
 
     plt.subplot(1, 6, 6)
-    pc = plot_meshes(meshes, post_event_slip_deficit, plt.gca(), "magma_r")
+    pc = plot_meshes(meshes, post_event_slip_deficit, plt.gca(), "spring")
     plt.colorbar(pc, label="slip deficit (m)")
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
     plt.title(f"post-earthquake slip deficit")
