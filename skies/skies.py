@@ -665,12 +665,14 @@ def interpolate_and_plot(fill_value):
 
 def get_eigenvalues_and_eigenvectors(n_eigenvalues, x, y, z):
     n_tde = x.size
+    print(f"{n_tde}")
 
     # Calculate Cartesian distances between triangle centroids
     centroid_coordinates = np.array([x, y, z]).T
     distance_matrix = scipy.spatial.distance.cdist(
         centroid_coordinates, centroid_coordinates, "euclidean"
     )
+    print("--- HERE ---")
 
     # Rescale distance matrix to the range 0-1
     distance_matrix = (distance_matrix - np.min(distance_matrix)) / np.ptp(
@@ -1159,16 +1161,22 @@ def get_event_area_and_mean_slip(mesh, event):
 
 
 def get_event_slip_single_mesh(mesh, event):
-
-    if event.target_area <= event.hypocenter_triangle_area:
+    # TODO: FIX CONDITION FOR ENTERING EIGENVALUE CALCULATION
+    # SHOULD NOT ENTER UNLESS THERE IS MORE THAN 1 TRIANGLE
+    # if event.target_area <= event.hypocenter_triangle_area:
+    if event.triangle_index.size == 1:
         event.n_eigenvalues = 0
         event.slip = event.moment / (
             event.shear_modulus * event.hypocenter_triangle_area
         )
         event.pre_scaled_moment = np.copy(event.moment)
 
-    if event.target_area > event.hypocenter_triangle_area:
+    # if event.target_area > event.hypocenter_triangle_area:
+    elif event.triangle_index.size > 1:
+        print("--- EIGENVALUES NEEDED ---")
         event.n_eigenvalues = event.triangle_index.size
+        print(f"{event.n_eigenvalues=}")
+        print("--- PRE-EIGENVALUES ---")
         eigenvalues, eigenvectors = get_eigenvalues_and_eigenvectors(
             event.n_eigenvalues,
             (mesh.x_centroid[event.hypocenter_triangle_index] - mesh.x_centroid)[
@@ -1181,6 +1189,7 @@ def get_event_slip_single_mesh(mesh, event):
                 event.triangle_index
             ],
         )
+        print("--- POST-EIGENVALUES ---")
 
         event.slip = np.zeros(event.triangle_index.size)
         weights = np.random.randn(eigenvalues.size)
@@ -1193,7 +1202,7 @@ def get_event_slip_single_mesh(mesh, event):
             event.triangle_index
         ]
 
-        # Sigmoid taper: M
+        # Sigmoid taper: Requires careful tuning
         # taper_transition = 1.5 * np.mean(distances)
         # taper_width = 10 / taper_transition  # (m)
         # slip_taper = normalized_sigmoid(taper_transition, taper_width, distances)
