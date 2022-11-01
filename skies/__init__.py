@@ -43,6 +43,8 @@ from .skies import (
     quick_plot_slip,
     plot_event_select_eigenmodes,
     quick_plot_mode,
+    get_tanh_probability_vector,
+    get_tanh_probability,
 )
 
 

@@ -1418,3 +1418,41 @@ def quick_plot_mode(mesh, fill_value, params):
     plt.yticks([])
     plt.gca().set_facecolor("gainsboro")
     plt.gca().set_aspect("equal", adjustable="box")
+
+
+# def get_geometric_moment_condition(event_geometric_moment, mesh_geometric_moment):
+#     # Case 1: Average geometric moment is grearter than zero
+#     if np.sum(mesh_geometric_moment) > 0:
+#         geometric_moment_condition = True
+#     else:
+#         geometric_moment_condition = False
+
+# Case 2: Accumulated geometric moment greater than or equal to
+
+# if event_geometric_moment < np.sum(
+#     mesh_geometric_moment[np.where(mesh_geometric_moment > 0.0)]
+# ):
+#     geometric_moment_condition = True
+#     # print(f"{event_geometric_moment[0]:0.2e}")
+#     # print(f"{np.sum(mesh_geometric_moment[np.where(mesh_geometric_moment > 0.0)]):0.2e}")
+# else:
+#     geometric_moment_condition = False
+# return geometric_moment_condition
+
+
+def get_tanh_probability(x, amplitude_scale_factor, data_scale_factor):
+    tanh_probability = amplitude_scale_factor * np.tanh(data_scale_factor * x)
+    if tanh_probability < 0:
+        tanh_probability = 0
+    if tanh_probability > 1:
+        tanh_probability = 1
+    return tanh_probability
+
+
+def get_tanh_probability_vector(x, amplitude_scale_factor, data_scale_factor):
+    tanh_probability = amplitude_scale_factor * np.tanh(data_scale_factor * x)
+    tanh_probability[np.where(x < 0.0)] = 0.0
+    tanh_probability -= np.min(tanh_probability)
+    tanh_probability[np.isnan(tanh_probability)] = 0.0
+    tanh_probability = tanh_probability / np.sum(tanh_probability)
+    return tanh_probability
