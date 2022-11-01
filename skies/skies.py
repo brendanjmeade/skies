@@ -1456,3 +1456,11 @@ def get_tanh_probability_vector(x, amplitude_scale_factor, data_scale_factor):
     tanh_probability[np.isnan(tanh_probability)] = 0.0
     tanh_probability = tanh_probability / np.sum(tanh_probability)
     return tanh_probability
+
+
+def get_omori_decay_probability(time_vector, time_of_earthquake, amplitude, decay_time):
+    omori_decay_probability = amplitude / (
+        1 + (1 / decay_time) * (time_vector - time_of_earthquake)
+    )
+    omori_decay_probability[time_vector < time_of_earthquake] = 0.0
+    return omori_decay_probability
