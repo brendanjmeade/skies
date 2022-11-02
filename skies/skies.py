@@ -1129,7 +1129,7 @@ def get_event_area_and_mean_slip(mesh, event):
     # In the case where event area larger than the area of the hypocentral triangle
     # then just have uniform slip on the single hypocentral triangle
     if event.target_area <= event.hypocenter_triangle_area:
-        print("Target area is less than hypocenter triangle area")
+        # print("Target area is less than hypocenter triangle area")
         event.actual_area = event.hypocenter_triangle_area
         event.triangle_index = event.hypocenter_triangle_index
         event.hypocenter_triangle_to_all_triangles_distances = np.array([])
