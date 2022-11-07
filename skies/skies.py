@@ -943,7 +943,7 @@ def get_event_slip(meshes, event, eigenvalues, eigenvectors):
     return event
 
 
-def plot_initial_data(meshes, initial_slip_deficit):
+def plot_initial_data(meshes, initial_slip_deficit_rate):
     # Plot all mesh data and initial slip deficit condition
     plt.figure(figsize=(15, 4))
     plt.subplot(1, 4, 1)
@@ -958,10 +958,10 @@ def plot_initial_data(meshes, initial_slip_deficit):
     plt.title(f"{np.sum(meshes[0].areas) / KM2_TO_M2:0.2f} (km^2)")
 
     plt.subplot(1, 4, 3)
-    pc = plot_meshes(meshes, initial_slip_deficit, plt.gca(), "inferno_r")
-    plt.colorbar(pc, label="initial slip deficit (m)")
+    pc = plot_meshes(meshes, initial_slip_deficit_rate, plt.gca(), "inferno_r")
+    plt.colorbar(pc, label="slip deficit rate (mm/yr)")
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
-    plt.title(f"{np.max(initial_slip_deficit):0.2f} (m)")
+    plt.title(f"{np.max(initial_slip_deficit_rate):0.2f} (mm/yr)")
 
 
 def plot_event(
@@ -1227,6 +1227,7 @@ def get_event_area_slip_hypocenter(mesh, event):
 
 def get_event_area_slip_triangle_index(mesh, event):
     event.moment = moment_magnitude_to_moment(event.moment_magnitude)
+    event.geometric_moment_scalar = event.moment / event.shear_modulus
     event.target_area = event.area_scaling * moment_magnitude_to_area_allen_and_hayes(
         event.moment_magnitude
     )
@@ -1485,11 +1486,10 @@ def create_non_event(n_tde):
     event.slip = np.nan
     event.pre_scaled_moment = np.nan
     event.slip_scaling_factor = np.nan
-    event.slip_all_elements = np.zeros(n_tde) # This is the important one
-    event.scalar_geometric_moment = np.nan
-    event.mesh_geometric_moment_pre_event = np.zeros(n_tde) # This is important
-    event.mesh_geometric_moment_post_event = np.zeros(n_tde) # This is important
+    event.slip_all_elements = np.zeros(n_tde)  # This is the important one
+    event.geometric_moment_scalar = np.nan
+    event.mesh_geometric_moment_pre_event = np.zeros(n_tde)  # This is important
+    event.mesh_geometric_moment_post_event = np.zeros(n_tde)  # This is important
     event.omori_amplitude = np.nan
     event.omori_decay_time = np.nan
     return event
-    
