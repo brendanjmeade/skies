@@ -1471,7 +1471,7 @@ def create_non_event(n_tde):
     event = addict.Dict()
     event.shear_modulus = np.nan
     event.area_scaling = np.nan
-    event.moment_magnitude = np.nan
+    event.moment_magnitude = 0.0
     event.moment = np.nan
     event.geometric_moment = np.nan
     event.location_probability = np.nan
@@ -1479,7 +1479,7 @@ def create_non_event(n_tde):
     event.target_area = np.nan
     event.hypocenter_triangle_area = np.nan
     event.actual_area = np.nan
-    event.triangle_index = np.nan
+    event.triangle_index = 0
     event.hypocenter_triangle_to_all_triangles_distances
     event.mean_slip = np.nan
     event.n_eigenvalues = np.nan
