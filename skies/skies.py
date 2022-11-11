@@ -1471,7 +1471,7 @@ def create_non_event(n_tde):
     event = addict.Dict()
     event.shear_modulus = np.nan
     event.area_scaling = np.nan
-    event.moment_magnitude = 0.0
+    event.moment_magnitude = np.array([0.0])
     event.moment = np.nan
     event.geometric_moment = np.nan
     event.location_probability = np.nan
