@@ -1469,15 +1469,15 @@ def get_omori_decay_probability(time_vector, time_of_earthquake, amplitude, deca
 
 def create_non_event(n_tde):
     event = addict.Dict()
-    event.shear_modulus = np.nan
-    event.area_scaling = np.nan
+    event.shear_modulus = 0.0
+    event.area_scaling = 0.0
     event.moment_magnitude = np.array([0.0])
-    event.moment = np.nan
-    event.geometric_moment = np.nan
-    event.location_probability = np.nan
+    event.moment = 0.0
+    event.geometric_moment = 0.0
+    event.location_probability = 0.0
     event.hypocenter_triangle_index = np.nan
-    event.target_area = np.nan
-    event.hypocenter_triangle_area = np.nan
+    event.target_area = 0.0
+    event.hypocenter_triangle_area = 0.0
     event.actual_area = np.nan
     event.triangle_index = 0
     event.hypocenter_triangle_to_all_triangles_distances
