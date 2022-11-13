@@ -2,6 +2,7 @@ __pycache__/
 celeri.egg-info/
 UNKNOWN.egg-info/
 output/
+.idea/
 runs/
 *.py[cod]
 .ipynb_checkpoints
