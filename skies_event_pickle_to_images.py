@@ -1,22 +1,15 @@
-import datetime
 import glob
-import os
 import pickle
-import timeit
-from importlib import reload
 
 import addict
 import colorcet as cc
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy
 from scipy.interpolate import griddata
 
 import skies
 
 plt.close("all")
-
 
 # Dumb copy and past of params from skies_time_05.py
 params = addict.Dict()
@@ -302,8 +295,8 @@ def plot_event_for_animation(
     # Save figure to file
     base_file_name = f"{iteration_step:010d}"
     plt.savefig(base_file_name + ".png", dpi=500)
-    plt.close("all")
-    # plt.show(block=False)
+    # plt.close("all")
+    plt.show(block=False)
 
 
 # Hacky read mesh file
@@ -347,22 +340,28 @@ meshes = skies.read_meshes(mesh_parameters_file_name)
 #     9123,
 # ]
 
-event_file_index = 8357 + 1
-event_file_index = 2786
-event_file_index = 3877
-
+event_file_index = 8357
 
 event = pickle.load(open(event_file_names[event_file_index], "rb"))
 print(f"Read: {event_file_names[event_file_index]}")
-plot_event_for_animation(
-    event,
-    meshes,
-    event.mesh_geometric_moment_pre_event,
-    event.location_probability,
-    event.mesh_geometric_moment_post_event,
-    event.mesh_last_event_slip,
-    event.mesh_total_slip,
-    0,  # time_series.last_event_time,
-    event_file_index,
-    event_file_index,
+# plot_event_for_animation(
+#     event,
+#     meshes,
+#     event.mesh_geometric_moment_pre_event,
+#     event.location_probability,
+#     event.mesh_geometric_moment_post_event,
+#     event.mesh_last_event_slip,
+#     event.mesh_total_slip,
+#     0,  # time_series.last_event_time,
+#     event_file_index,
+#     event_file_index,
+# )
+
+
+# Try writing out with meshio
+mesh_index = 0
+vtk_file_name = skies.get_vtk_file_name(
+    run_folder, mesh_parameters_file_name, mesh_index, event_file_index
 )
+skies.write_vtk_file(meshes[mesh_index], event.mesh_total_slip, "slip", vtk_file_name)
+print(f"Wrote: {vtk_file_name}")

@@ -1,19 +1,17 @@
-import addict
 import datetime
 import json
-import meshio
 import os
 import uuid
 import warnings
-import scipy
-import numpy as np
-import matplotlib.pyplot as plt
-from ismember import ismember
-import matplotlib
 
-# from scipy.interpolate import SmoothBivariateSpline
+import addict
 import colorcet as cc
-
+import matplotlib
+import matplotlib.pyplot as plt
+import meshio
+import numpy as np
+import scipy
+from ismember import ismember
 
 # Constants and parameters
 N_GRID_X = 500
@@ -1493,3 +1491,27 @@ def create_non_event(n_tde):
     event.omori_amplitude = np.nan
     event.omori_decay_time = np.nan
     return event
+
+
+def write_vtk_file(mesh, cell_data, cell_data_label, vtk_file_name):
+    """
+    See: https://github.com/nschloe/meshio
+    """
+    points = mesh.meshio_object.points.tolist()
+    cells = [("triangle", mesh.meshio_object.cells[2].data.tolist())]
+    cell_data = {cell_data_label: [cell_data.tolist()]}
+    vtk_mesh = meshio.Mesh(points, cells, cell_data=cell_data)
+    vtk_mesh.write(vtk_file_name, file_format="vtk")
+
+
+def get_vtk_file_name(run_folder, mesh_parameters_file_name, mesh_index, event_index):
+    vtk_file_name = (
+        run_folder
+        + mesh_parameters_file_name.split(".")[0]
+        + "_"
+        + str(mesh_index)
+        + "_"
+        + str(event_index)
+        + ".vtk"
+    )
+    return vtk_file_name
