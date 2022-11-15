@@ -1515,3 +1515,93 @@ def get_vtk_file_name(run_folder, mesh_parameters_file_name, mesh_index, event_i
         + ".vtk"
     )
     return vtk_file_name
+
+
+def plot_probability_and_events_time_series(
+    params,
+    output_folder,
+    time_series,
+    start_idx,
+    end_idx,
+):
+    event_idx = np.where(time_series.event_trigger_flag == 1)[0]
+    figsize = (10, 5)
+    plt.figure(figsize=figsize)
+
+    # Plot probability time series
+    plt.subplot(2, 1, 1)
+    plt.plot(
+        time_series.time[start_idx:end_idx],
+        time_series.probability_weight[start_idx:end_idx],
+        "-k",
+        linewidth=0.5,
+    )
+    plt.plot(
+        [time_series.time[start_idx], time_series.time[end_idx - 1]],
+        [0, 0],
+        "-k",
+        linewidth=0.5,
+    )
+    plt.fill_between(
+        time_series.time[start_idx:end_idx],
+        time_series.probability_weight[start_idx:end_idx],
+        np.zeros_like(time_series.time[start_idx:end_idx]),
+        time_series.probability_weight[start_idx:end_idx] > 0,
+        color="gold",
+        alpha=1.0,
+        edgecolor=None,
+    )
+
+    plt.fill_between(
+        time_series.time[start_idx:end_idx],
+        time_series.probability_weight[start_idx:end_idx],
+        np.zeros_like(time_series.time[start_idx:end_idx]),
+        time_series.probability_weight[start_idx:end_idx] < 0,
+        color="dodgerblue",
+        alpha=1.0,
+        edgecolor=None,
+    )
+    plt.xlim([start_idx, end_idx])
+    plt.gca().set_ylim(bottom=0.0)
+    plt.ylabel("$p^t$")
+
+    # Plot earthquake magnitude stem plot
+    plt.subplot(2, 1, 2)
+    for i in range(event_idx.size):
+        plt.plot(
+            [
+                time_series.time[event_idx[i]],
+                time_series.time[event_idx[i]],
+            ],
+            [
+                params.minimum_event_moment_magnitude,
+                time_series.event_magnitude[event_idx[i]],
+            ],
+            "-",
+            linewidth=0.1,
+            zorder=10,
+            color="k",
+        )
+
+    cmap = cc.cm.CET_L17
+    magnitude_plot_size = 1e-5 * 10 ** time_series.event_magnitude[event_idx]
+    plt.scatter(
+        time_series.time[event_idx],
+        time_series.event_magnitude[event_idx],
+        s=magnitude_plot_size,
+        c=time_series.event_magnitude[event_idx],
+        zorder=20,
+        alpha=1.0,
+        edgecolors="k",
+        linewidths=0.5,
+        cmap=cmap,
+        vmin=6.0,
+        vmax=9.0,
+    )
+
+    plt.xlabel("time")
+    plt.ylabel("$M_W$")
+    plt.xlim([start_idx, end_idx])
+    plt.gca().set_ylim(bottom=params.minimum_event_moment_magnitude)
+    plt.savefig(output_folder + "/probability_magnitude" + ".pdf")
+    plt.savefig(output_folder + "/probability_magnitude" + ".png", dpi=500)

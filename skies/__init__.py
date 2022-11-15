@@ -49,6 +49,7 @@ from .skies import (
     create_non_event,
     write_vtk_file,
     get_vtk_file_name,
+    plot_probability_and_events_time_series,
 )
 
 

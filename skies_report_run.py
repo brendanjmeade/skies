@@ -78,6 +78,10 @@ plt.plot(time_series_moment_magnitude, "rx")
 plt.show(block=False)
 sys.exit()
 
+
+# TODO: #25 Calculate mean time between earthquakes at different magnitudes
+
+
 # Plot a single event
 event_file_index = 0
 
