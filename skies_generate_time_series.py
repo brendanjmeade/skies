@@ -1,7 +1,6 @@
 import datetime
 import os
 import pickle
-import timeit
 
 import addict
 import matplotlib.pyplot as plt
@@ -71,6 +70,7 @@ params.min_contour_value = 0.1  # (m)
 
 
 # Select mesh if multiple have been loaded
+# TODO: Move down to other mesh statements and make this mesh.mesh
 mesh = meshes[params.mesh_index]
 
 # Storage
@@ -106,6 +106,7 @@ mesh_interseismic_loading_rate = (
 # temp = np.zeros((10, mesh.n_tde)) # Track geometric moment maps
 
 # Main time loop
+start_time = datetime.datetime.now()
 for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
     # Update mesh_geometric_moment
     mesh_geometric_moment += (
@@ -204,7 +205,7 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
     event.mesh_initial_dip_slip_deficit = mesh_initial_dip_slip_deficit
 
     # Save event dictionary as pickle file
-    event_pickle_file_name = f"{output_path}/event_{i:010.0f}.pickle"
+    event_pickle_file_name = f"{output_folder}/event_{i:010.0f}.pickle"
     with open(event_pickle_file_name, "wb") as pickle_file:
         pickle.dump(event, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -222,7 +223,8 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
             params.time_probability_history_scale_factor
             * earthquake_probability_list[j][i + 1]
         )
-
+end_time = datetime.datetime.now()
+print(f"\nSequence generation run time: {str(end_time - start_time)}\n")
 
 # Plot time probability and event moment magnitude time series
 start_idx = 0
