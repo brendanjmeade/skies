@@ -942,7 +942,7 @@ def get_event_slip(meshes, event, eigenvalues, eigenvectors):
     return event
 
 
-def plot_initial_data(meshes, initial_slip_deficit_rate):
+def plot_initial_data(meshes, initial_slip_deficit_rate, output_folder):
     # Plot all mesh data and initial slip deficit condition
     plt.figure(figsize=(15, 4))
     plt.subplot(1, 4, 1)
@@ -961,6 +961,9 @@ def plot_initial_data(meshes, initial_slip_deficit_rate):
     plt.colorbar(pc, label="slip deficit rate (mm/yr)")
     plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
     plt.title(f"{np.max(initial_slip_deficit_rate):0.2f} (mm/yr)")
+
+    plt.savefig(output_folder + "/initial_mesh_data.pdf")
+    plt.savefig(output_folder + "/initial_mesh_data.png", dpi=500)
 
 
 def plot_event(

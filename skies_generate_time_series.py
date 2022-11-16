@@ -69,8 +69,7 @@ with open(output_folder + "/params.json", "w") as params_output_file:
 mesh_initial_dip_slip_deficit = np.load(
     "cascadia_low_resolution_tde_dip_slip_rates.npy"
 )
-skies.plot_initial_data(meshes, mesh_initial_dip_slip_deficit)
-plt.show()
+skies.plot_initial_data(meshes, mesh_initial_dip_slip_deficit, output_folder)
 
 
 # Storage
