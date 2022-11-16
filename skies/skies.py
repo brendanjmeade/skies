@@ -234,15 +234,15 @@ def print_event(event, meshes):
     print(f"Scaling law rupture area = {event.target_area[0] / 1e6:0.2f} (km^2)")
 
 
-def print_magnitude_overview(meshes):
+def print_magnitude_overview(mesh):
     minimum_single_triangle_moment_magnitude = area_to_moment_magnitude_allen_and_hayes(
-        np.min(meshes[0].areas)
+        np.min(mesh.areas)
     )
     maximum_single_triangle_moment_magnitude = area_to_moment_magnitude_allen_and_hayes(
-        np.max(meshes[0].areas)
+        np.max(mesh.areas)
     )
     maximum_moment_magnitude = area_to_moment_magnitude_allen_and_hayes(
-        np.sum(meshes[0].areas)
+        np.sum(mesh.areas)
     )
 
     print("Magnitude overview:")
