@@ -720,10 +720,10 @@ def get_synthetic_accumulated_slip(mesh, sources):
     return slip_distribution
 
 
-def plot_meshes(meshes, fill_value, ax, cmap_string):
-    x_coords = meshes[0].meshio_object.points[:, 0]
-    y_coords = meshes[0].meshio_object.points[:, 1]
-    vertex_array = np.asarray(meshes[0].verts)
+def plot_meshes(mesh, fill_value, ax, cmap_string):
+    x_coords = mesh.meshio_object.points[:, 0]
+    y_coords = mesh.meshio_object.points[:, 1]
+    vertex_array = np.asarray(mesh.verts)
 
     if not ax:
         ax = plt.gca()
@@ -942,24 +942,24 @@ def get_event_slip(meshes, event, eigenvalues, eigenvectors):
     return event
 
 
-def plot_initial_data(meshes, initial_slip_deficit_rate, output_folder):
+def plot_initial_data(mesh, initial_slip_deficit_rate, output_folder):
     # Plot all mesh data and initial slip deficit condition
     plt.figure(figsize=(15, 4))
     plt.subplot(1, 4, 1)
-    pc = plot_meshes(meshes, np.zeros(meshes[0].areas.size), plt.gca(), "Blues")
-    plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
-    plt.title(f"{meshes[0].n_tde} triangles")
+    pc = plot_meshes(mesh, np.zeros(mesh.areas.size), plt.gca(), "Blues")
+    plt.plot(mesh.x_perimeter, mesh.y_perimeter, "-k")
+    plt.title(f"{mesh.n_tde} triangles")
 
     plt.subplot(1, 4, 2)
-    pc = plot_meshes(meshes, meshes[0].areas / 1e6, plt.gca(), "plasma")
+    pc = plot_meshes(mesh, mesh.areas / 1e6, plt.gca(), "plasma")
     plt.colorbar(pc, label="triangle areas (km^2)")
-    plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
-    plt.title(f"{np.sum(meshes[0].areas) / KM2_TO_M2:0.2f} (km^2)")
+    plt.plot(mesh.x_perimeter, mesh.y_perimeter, "-k")
+    plt.title(f"{np.sum(mesh.areas) / KM2_TO_M2:0.2f} (km^2)")
 
     plt.subplot(1, 4, 3)
-    pc = plot_meshes(meshes, initial_slip_deficit_rate, plt.gca(), "inferno_r")
+    pc = plot_meshes(mesh, initial_slip_deficit_rate, plt.gca(), "inferno_r")
     plt.colorbar(pc, label="slip deficit rate (mm/yr)")
-    plt.plot(meshes[0].x_perimeter, meshes[0].y_perimeter, "-k")
+    plt.plot(mesh.x_perimeter, mesh.y_perimeter, "-k")
     plt.title(f"{np.max(initial_slip_deficit_rate):0.2f} (mm/yr)")
 
     plt.savefig(output_folder + "/initial_mesh_data.pdf")

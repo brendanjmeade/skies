@@ -22,7 +22,7 @@ np.random.seed(2)
 
 # Parameters for model run
 params = addict.Dict()
-params.n_time_steps = 400
+params.n_time_steps = 4000
 params.time_step = 5e-7
 params.b_value = -1.0
 params.shear_modulus = 3e10
@@ -60,11 +60,6 @@ params.initial_slip_deficit_rate_file = "cascadia_low_resolution_tde_dip_slip_ra
 with open(output_folder + "/params.json", "w") as params_output_file:
     json.dump(params, params_output_file)
 
-
-# Load initial slip defict and multiply by time cascadia_low_resolution_tde_dip_slip_rates.npy
-# TODO: Make this something that is loaded from a file specified in params
-mesh_initial_dip_slip_deficit = np.load(params.initial_slip_deficit_rate_file)
-
 # Storage
 time_series = addict.Dict()
 time_series.time = np.linspace(0, params.n_time_steps, params.n_time_steps)
@@ -80,41 +75,38 @@ time_series.omori_history_effect = np.zeros(
     (params.n_time_steps, params.n_events_omori_history_effect)
 )
 
-# Initial geometric moment and storage
-# TODO: #23 Convert to mesh_geometric_moment dictionary?
-# Select mesh if multiple have been loaded
-# TODO: Move down to other mesh statements and make this mesh.mesh
+mesh = addict.Dict()
 meshes = skies.read_meshes(params.mesh_parameters_file_name)
-mesh = meshes[params.mesh_index]
-mesh_geometric_moment = np.zeros(mesh.n_tde)
-mesh_last_event_slip = np.zeros(mesh.n_tde)
-mesh_total_slip = np.zeros(mesh.n_tde)
-mesh_geometric_moment_pre_event = np.copy(mesh_geometric_moment)
-mesh_geometric_moment_post_event = np.zeros_like(mesh_geometric_moment)
-mesh_geometric_moment_scalar = np.zeros_like(time_series.time)
-mesh_geometric_moment_scalar_non_zero = np.zeros_like(time_series.time)
-mesh_geometric_moment_scalar[0] = np.sum(mesh_geometric_moment)
-
-mesh_interseismic_loading_rate = (
-    params.geometic_moment_rate_scale_factor * mesh_initial_dip_slip_deficit
+mesh.mesh = meshes[params.mesh_index]
+mesh.mesh_geometric_moment = np.zeros(mesh.mesh.n_tde)
+mesh.mesh_last_event_slip = np.zeros(mesh.mesh.n_tde)
+mesh.mesh_total_slip = np.zeros(mesh.mesh.n_tde)
+mesh.mesh_geometric_moment_pre_event = np.copy(mesh.mesh_geometric_moment)
+mesh.mesh_geometric_moment_post_event = np.zeros_like(mesh.mesh_geometric_moment)
+mesh.mesh_geometric_moment_scalar = np.zeros_like(time_series.time)
+mesh.mesh_geometric_moment_scalar_non_zero = np.zeros_like(time_series.time)
+mesh.mesh_geometric_moment_scalar[0] = np.sum(mesh.mesh_geometric_moment)
+# TODO: This should be generalized so that strike- or -dip slip
+# or both can be specified
+mesh.mesh_initial_dip_slip_deficit = np.load(params.initial_slip_deficit_rate_file)
+mesh.mesh_interseismic_loading_rate = (
+    params.geometic_moment_rate_scale_factor * mesh.mesh_initial_dip_slip_deficit
 )
 
 # Display information about initial mesh and slip deficit rates
-skies.print_magnitude_overview(mesh)
-skies.plot_initial_data(meshes, mesh_initial_dip_slip_deficit, output_folder)
-
+skies.print_magnitude_overview(mesh.mesh)
+skies.plot_initial_data(mesh.mesh, mesh.mesh_initial_dip_slip_deficit, output_folder)
 
 # Main time loop
 start_time = datetime.datetime.now()
 for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
     # Update mesh_geometric_moment
-    mesh_geometric_moment += (
-        params.time_step * mesh_interseismic_loading_rate * mesh.areas
+    mesh.mesh_geometric_moment += (
+        params.time_step * mesh.mesh_interseismic_loading_rate * mesh.mesh.areas
     )
-    # temp[i, :] = mesh_geometric_moment
-    mesh_geometric_moment_scalar[i + 1] = np.sum(mesh_geometric_moment)
-    mesh_geometric_moment_scalar_non_zero[i + 1] = np.sum(
-        mesh_geometric_moment[np.where(mesh_geometric_moment > 0.0)]
+    mesh.mesh_geometric_moment_scalar[i + 1] = np.sum(mesh.mesh_geometric_moment)
+    mesh.mesh_geometric_moment_scalar_non_zero[i + 1] = np.sum(
+        mesh.mesh_geometric_moment[np.where(mesh.mesh_geometric_moment > 0.0)]
     )
 
     # Determine whether there is an event at this time step
@@ -145,19 +137,22 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
 
         # Find event hypocentral triangle
         event.location_probability = skies.get_tanh_probability_vector(
-            mesh_geometric_moment_pre_event,
+            mesh.mesh_geometric_moment_pre_event,
             params.location_probability_amplitude_scale_factor,
             params.location_probability_data_scale_factor,
         )
         event.hypocenter_triangle_index = np.random.choice(
-            mesh.n_tde, params.n_samples, p=event.location_probability
+            mesh.mesh.n_tde, params.n_samples, p=event.location_probability
         )[0]
 
         # Generate coseismic slip area and slip distribution
-        event = skies.get_event_area_slip_triangle_index(mesh, event)
-        event.mesh_geometric_moment_pre_event = np.copy(mesh_geometric_moment_pre_event)
+        event = skies.get_event_area_slip_triangle_index(mesh.mesh, event)
+        event.mesh_geometric_moment_pre_event = np.copy(
+            mesh.mesh_geometric_moment_pre_event
+        )
         event.mesh_geometric_moment_post_event = np.copy(
-            mesh_geometric_moment_pre_event - (event.slip_all_elements * mesh.areas)
+            mesh.mesh_geometric_moment_pre_event
+            - (event.slip_all_elements * mesh.mesh.areas)
         )
 
         # Generate Omori rate decay
@@ -184,24 +179,27 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
         ] = omori_rate_perturbation  # Still need to implement below.
 
         # Update spatially variable mesh parameters
-        mesh_geometric_moment -= event.slip_all_elements * mesh.areas
-        mesh_last_event_slip = event.slip_all_elements
-        mesh_total_slip += event.slip_all_elements
+        mesh.mesh_geometric_moment -= event.slip_all_elements * mesh.mesh.areas
+        mesh.mesh_last_event_slip = event.slip_all_elements
+        mesh.mesh_total_slip += event.slip_all_elements
         event.mesh_last_event_slip = event.slip_all_elements
-        event.mesh_total_slip = mesh_total_slip
+        event.mesh_total_slip = mesh.mesh_total_slip
 
     else:
         # Create dummy event dictionary because no event occured
-        event = skies.create_non_event(mesh.n_tde)
-        event.mesh_geometric_moment_pre_event = np.copy(mesh_geometric_moment_pre_event)
-        event.mesh_geometric_moment_post_event = mesh_geometric_moment_pre_event + (
-            params.time_step * mesh_interseismic_loading_rate * mesh.areas
+        event = skies.create_non_event(mesh.mesh.n_tde)
+        event.mesh_geometric_moment_pre_event = np.copy(
+            mesh.mesh_geometric_moment_pre_event
         )
-        event.mesh_last_event_slip = mesh_last_event_slip
-        event.mesh_total_slip = mesh_total_slip
+        event.mesh_geometric_moment_post_event = (
+            mesh.mesh_geometric_moment_pre_event
+            + (params.time_step * mesh.mesh_interseismic_loading_rate * mesh.mesh.areas)
+        )
+        event.mesh_last_event_slip = mesh.mesh_last_event_slip
+        event.mesh_total_slip = mesh.mesh_total_slip
 
     # TODO: Check this???
-    event.mesh_initial_dip_slip_deficit = mesh_initial_dip_slip_deficit
+    event.mesh_initial_dip_slip_deficit = mesh.mesh_initial_dip_slip_deficit
 
     # Save event dictionary as pickle file
     event_pickle_file_name = f"{output_folder}/events/event_{i:010.0f}.pickle"
@@ -211,10 +209,12 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
     # Save time step parameters as .vtk files for plotting with Paraview and pyvista
 
     # Pre-event moment for next time step
-    mesh_geometric_moment_pre_event = np.copy(event.mesh_geometric_moment_post_event)
+    mesh.mesh_geometric_moment_pre_event = np.copy(
+        event.mesh_geometric_moment_post_event
+    )
 
     # Update probability
-    time_series.probability[i + 1] = mesh_geometric_moment_scalar_non_zero[i + 1]
+    time_series.probability[i + 1] = mesh.mesh_geometric_moment_scalar_non_zero[i + 1]
 
     # Sum contribution from all past earthquakes
     for j in range(len(earthquake_probability_list)):
@@ -223,7 +223,7 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
             * earthquake_probability_list[j][i + 1]
         )
 end_time = datetime.datetime.now()
-print(f"\nEvent sequence generation run time: {str(end_time - start_time)}\n")
+print(f"Event sequence generation run time: {str(end_time - start_time)}")
 
 # Plot time probability and event moment magnitude time series
 start_idx = 0
