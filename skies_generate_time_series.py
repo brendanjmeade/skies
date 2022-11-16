@@ -72,8 +72,8 @@ time_series.event_magnitude = np.zeros_like(time_series.time)
 time_series.event_trigger_flag = np.zeros_like(time_series.time)
 time_series.last_event_time = 0
 
-# TODO: #22 Change earthquake to event. Make a dictionary?  Can I eliminate `earthquake_index_list`, `earthquake_magnitude_list`, `earthquake_probability_list`
-earthquake_probability_list = []
+# TODO: create finite size version
+event_probability_list = []
 time_series.omori_history_effect = np.zeros(
     (params.n_time_steps, params.n_events_omori_history_effect)
 )
@@ -176,7 +176,7 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
         )
 
         # Store Omori rate decay
-        earthquake_probability_list.append(omori_rate_perturbation)
+        event_probability_list.append(omori_rate_perturbation)
         time_series.omori_history_effect[
             :, 0
         ] = omori_rate_perturbation  # Still need to implement below.
@@ -220,10 +220,10 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
     time_series.probability[i + 1] = mesh.mesh_geometric_moment_scalar_non_zero[i + 1]
 
     # Sum contribution from all past earthquakes
-    for j in range(len(earthquake_probability_list)):
+    for j in range(len(event_probability_list)):
         time_series.probability[i + 1] += (
             params.time_probability_history_scale_factor
-            * earthquake_probability_list[j][i + 1]
+            * event_probability_list[j][i + 1]
         )
 
 end_time = datetime.datetime.now()
@@ -236,6 +236,10 @@ with open(output_folder + "/time_series.pickle", "wb") as pickle_file:
 # Save mesh dictionary to .pickle file in output_folder
 with open(output_folder + "/mesh.pickle", "wb") as pickle_file:
     pickle.dump(mesh, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
+
+# Save random state to .pickle file in output_folder
+with open(output_folder + "/random_state.pickle", "wb") as pickle_file:
+    pickle.dump(np.random.get_state(), pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
 # Plot time probability and event moment magnitude time series
 start_idx = 0
