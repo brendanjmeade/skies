@@ -36,8 +36,9 @@ def create_output_folder(base_runs_folder, output_path):
         os.mkdir(base_runs_folder)
 
     # Make output folder for current run
-    print(f"{output_path=}")
+    print(f"Output filder: {output_path}")
     os.mkdir(output_path)
+    os.mkdir(output_path + "/events")
 
 
 def get_mesh_perimeter(meshes):

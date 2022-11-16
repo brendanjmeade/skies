@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import pickle
 
@@ -8,6 +9,8 @@ import numpy as np
 from tqdm import tqdm
 
 import skies
+
+plt.close("all")
 
 run_name = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 base_runs_folder = "./runs/"
@@ -20,22 +23,11 @@ meshes = skies.read_meshes(mesh_parameters_file_name)
 skies.print_magnitude_overview(meshes)
 
 
-# Load initial slip defict and multiply by time cascadia_low_resolution_tde_dip_slip_rates.npy
-# TODO: Make this something that is loaded from a file specified in params
-mesh_initial_dip_slip_deficit = np.load(
-    "cascadia_low_resolution_tde_dip_slip_rates.npy"
-)
-skies.plot_initial_data(meshes, mesh_initial_dip_slip_deficit)
-
-
 np.random.seed(2)
-# Save random state from good run
-# https://stackoverflow.com/questions/32808686/storing-a-random-state#:~:text=You%20can%20save%20the%20state,the%20state%20it%20was%20in.
-
 
 # Parameters for model run
 params = addict.Dict()
-params.n_time_steps = 4000
+params.n_time_steps = 400
 params.time_step = 5e-7
 params.b_value = -1.0
 params.shear_modulus = 3e10
@@ -66,12 +58,20 @@ params.min_latitude = 38.0
 params.max_latitude = 52.0
 params.n_contour_levels = 10
 params.min_contour_value = 0.1  # (m)
-# TODO: Save params to .json file in run folder
+
+# Save params dictionary to .json file in run folder
+with open(output_folder + "/params.json", "w") as params_output_file:
+    json.dump(params, params_output_file)
 
 
-# Select mesh if multiple have been loaded
-# TODO: Move down to other mesh statements and make this mesh.mesh
-mesh = meshes[params.mesh_index]
+# Load initial slip defict and multiply by time cascadia_low_resolution_tde_dip_slip_rates.npy
+# TODO: Make this something that is loaded from a file specified in params
+mesh_initial_dip_slip_deficit = np.load(
+    "cascadia_low_resolution_tde_dip_slip_rates.npy"
+)
+skies.plot_initial_data(meshes, mesh_initial_dip_slip_deficit)
+plt.show()
+
 
 # Storage
 time_series = addict.Dict()
@@ -90,6 +90,9 @@ time_series.omori_history_effect = np.zeros(
 
 # Initial geometric moment and storage
 # TODO: #23 Convert to mesh_geometric_moment dictionary?
+# Select mesh if multiple have been loaded
+# TODO: Move down to other mesh statements and make this mesh.mesh
+mesh = meshes[params.mesh_index]
 mesh_geometric_moment = np.zeros(mesh.n_tde)
 mesh_last_event_slip = np.zeros(mesh.n_tde)
 mesh_total_slip = np.zeros(mesh.n_tde)
@@ -102,8 +105,6 @@ mesh_geometric_moment_scalar[0] = np.sum(mesh_geometric_moment)
 mesh_interseismic_loading_rate = (
     params.geometic_moment_rate_scale_factor * mesh_initial_dip_slip_deficit
 )
-
-# temp = np.zeros((10, mesh.n_tde)) # Track geometric moment maps
 
 # Main time loop
 start_time = datetime.datetime.now()
@@ -205,7 +206,7 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
     event.mesh_initial_dip_slip_deficit = mesh_initial_dip_slip_deficit
 
     # Save event dictionary as pickle file
-    event_pickle_file_name = f"{output_folder}/event_{i:010.0f}.pickle"
+    event_pickle_file_name = f"{output_folder}/events/event_{i:010.0f}.pickle"
     with open(event_pickle_file_name, "wb") as pickle_file:
         pickle.dump(event, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
