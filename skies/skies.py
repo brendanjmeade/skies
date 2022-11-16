@@ -36,7 +36,7 @@ def create_output_folder(base_runs_folder, output_path):
         os.mkdir(base_runs_folder)
 
     # Make output folder for current run
-    print(f"Output filder: {output_path}")
+    print(f"Output folder: {output_path}")
     os.mkdir(output_path)
     os.mkdir(output_path + "/events")
 
