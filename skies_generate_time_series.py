@@ -15,12 +15,7 @@ plt.close("all")
 run_name = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 base_runs_folder = "./runs/"
 output_folder = os.path.join(base_runs_folder, run_name)
-
-# TODO: read this from command line/params file
-mesh_parameters_file_name = "western_north_america_mesh_parameters.json"
 skies.create_output_folder(base_runs_folder, output_folder)
-meshes = skies.read_meshes(mesh_parameters_file_name)
-skies.print_magnitude_overview(meshes)
 
 
 np.random.seed(2)
@@ -58,6 +53,8 @@ params.min_latitude = 38.0
 params.max_latitude = 52.0
 params.n_contour_levels = 10
 params.min_contour_value = 0.1  # (m)
+params.mesh_parameters_file_name = "western_north_america_mesh_parameters.json"
+params.initial_slip_deficit_rate_file = "cascadia_low_resolution_tde_dip_slip_rates.npy"
 
 # Save params dictionary to .json file in run folder
 with open(output_folder + "/params.json", "w") as params_output_file:
@@ -66,11 +63,7 @@ with open(output_folder + "/params.json", "w") as params_output_file:
 
 # Load initial slip defict and multiply by time cascadia_low_resolution_tde_dip_slip_rates.npy
 # TODO: Make this something that is loaded from a file specified in params
-mesh_initial_dip_slip_deficit = np.load(
-    "cascadia_low_resolution_tde_dip_slip_rates.npy"
-)
-skies.plot_initial_data(meshes, mesh_initial_dip_slip_deficit, output_folder)
-
+mesh_initial_dip_slip_deficit = np.load(params.initial_slip_deficit_rate_file)
 
 # Storage
 time_series = addict.Dict()
@@ -91,6 +84,7 @@ time_series.omori_history_effect = np.zeros(
 # TODO: #23 Convert to mesh_geometric_moment dictionary?
 # Select mesh if multiple have been loaded
 # TODO: Move down to other mesh statements and make this mesh.mesh
+meshes = skies.read_meshes(params.mesh_parameters_file_name)
 mesh = meshes[params.mesh_index]
 mesh_geometric_moment = np.zeros(mesh.n_tde)
 mesh_last_event_slip = np.zeros(mesh.n_tde)
@@ -104,6 +98,11 @@ mesh_geometric_moment_scalar[0] = np.sum(mesh_geometric_moment)
 mesh_interseismic_loading_rate = (
     params.geometic_moment_rate_scale_factor * mesh_initial_dip_slip_deficit
 )
+
+# Display information about initial mesh and slip deficit rates
+skies.print_magnitude_overview(mesh)
+skies.plot_initial_data(meshes, mesh_initial_dip_slip_deficit, output_folder)
+
 
 # Main time loop
 start_time = datetime.datetime.now()
@@ -224,7 +223,7 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
             * earthquake_probability_list[j][i + 1]
         )
 end_time = datetime.datetime.now()
-print(f"\nSequence generation run time: {str(end_time - start_time)}\n")
+print(f"\nEvent sequence generation run time: {str(end_time - start_time)}\n")
 
 # Plot time probability and event moment magnitude time series
 start_idx = 0
