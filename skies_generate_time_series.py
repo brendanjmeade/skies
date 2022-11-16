@@ -54,8 +54,10 @@ params.min_latitude = 38.0
 params.max_latitude = 52.0
 params.n_contour_levels = 10
 params.min_contour_value = 0.1  # (m)
-params.mesh_parameters_file_name = "western_north_america_mesh_parameters.json"
-params.initial_slip_deficit_rate_file = "cascadia_low_resolution_tde_dip_slip_rates.npy"
+params.mesh_parameters_file_name = "./data/western_north_america_mesh_parameters.json"
+params.initial_slip_deficit_rate_file = (
+    "./data/cascadia_low_resolution_tde_dip_slip_rates.npy"
+)
 
 # Save params dictionary to .json file in output_folder
 with open(output_folder + "/params.json", "w") as params_output_file:
