@@ -20,7 +20,8 @@ skies.create_output_folder(base_runs_folder, output_folder)
 
 np.random.seed(2)
 
-# Parameters for model run
+# params dictionary with model run parameters
+# TODO: Read from command line and allow overloading like `celeri`
 params = addict.Dict()
 params.n_time_steps = 4000
 params.time_step = 5e-7
@@ -56,7 +57,7 @@ params.min_contour_value = 0.1  # (m)
 params.mesh_parameters_file_name = "western_north_america_mesh_parameters.json"
 params.initial_slip_deficit_rate_file = "cascadia_low_resolution_tde_dip_slip_rates.npy"
 
-# Save params dictionary to .json file in run folder
+# Save params dictionary to .json file in output_folder
 with open(output_folder + "/params.json", "w") as params_output_file:
     json.dump(params, params_output_file)
 
@@ -222,8 +223,17 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
             params.time_probability_history_scale_factor
             * earthquake_probability_list[j][i + 1]
         )
+
 end_time = datetime.datetime.now()
 print(f"Event sequence generation run time: {str(end_time - start_time)}")
+
+# Save time_series dictionary to .pickle file in output_folder
+with open(output_folder + "/time_series.pickle", "wb") as pickle_file:
+    pickle.dump(time_series, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
+
+# Save mesh dictionary to .pickle file in output_folder
+with open(output_folder + "/mesh.pickle", "wb") as pickle_file:
+    pickle.dump(mesh, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
 # Plot time probability and event moment magnitude time series
 start_idx = 0
