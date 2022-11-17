@@ -20,16 +20,22 @@ skies.create_output_folder(base_runs_folder, output_folder)
 
 np.random.seed(2)
 
+
+# TODO: Option for truncating eigenvalues (1000?)
+# TODO: Omori effect:
+# time_series.cumulative_omori_effect # For cumulative effect over loop
+# event.omori_effect # For individual contributions
+
 # params dictionary with model run parameters
 # TODO: Read from command line and allow overloading like `celeri`
 params = addict.Dict()
-params.n_time_steps = 4000
+params.n_time_steps = 100000
 params.time_step = 5e-7
 params.b_value = -1.0
 params.shear_modulus = 3e10
 params.n_samples = 1
 params.n_binary = 2
-params.minimum_event_moment_magnitude = 6.0
+params.minimum_event_moment_magnitude = 5.5
 params.maximum_event_moment_magnitude = 9.0
 params.time_probability_amplitude_scale_factor = 5e-2
 params.time_probability_data_scale_factor = 1e-12
