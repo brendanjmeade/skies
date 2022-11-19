@@ -31,4 +31,5 @@ dependencies:
       - loguru
       - okada_wrapper
       - pygmt
+      - pyvista
       - ismember
