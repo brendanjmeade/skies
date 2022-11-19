@@ -624,7 +624,7 @@ def plot_slip_distributions(
     interpolate_and_plot(slip_distribution_estimated[1::2])
 
     plt.suptitle(suptitle_string)
-    plt.show()
+    # plt.show()
 
 
 def interpolate_and_plot(fill_value):
@@ -964,6 +964,7 @@ def plot_initial_data(mesh, initial_slip_deficit_rate, output_folder):
 
     plt.savefig(output_folder + "/initial_mesh_data.pdf")
     plt.savefig(output_folder + "/initial_mesh_data.png", dpi=500)
+    plt.close("all")
 
 
 def plot_event(
@@ -1064,7 +1065,7 @@ def plot_event(
     plt.title("post-eq $\hat{m}$")
 
     # plt.suptitle(f"i = {iteration_step}")
-    plt.show()
+    # plt.show()
 
 
 def area_to_moment_magnitude_allen_and_hayes(area):
@@ -1292,7 +1293,7 @@ def quick_plot_slip(mesh, event, params):
         base_file_name = "./runs/" + params.run_name + "/" + get_datetime_uuid_string()
         plt.savefig(base_file_name + ".pdf")
         plt.savefig(base_file_name + ".png", dpi=500)
-    plt.show()
+    # plt.show()
 
 
 def plot_event_select_eigenmodes(mesh, event, params):
@@ -1390,7 +1391,7 @@ def plot_event_select_eigenmodes(mesh, event, params):
             plt.savefig(base_file_name + ".pdf")
             plt.savefig(base_file_name + ".png", dpi=500)
 
-    plt.show()
+    # plt.show()
 
 
 def quick_plot_mode(mesh, fill_value, params):
