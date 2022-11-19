@@ -29,7 +29,7 @@ np.random.seed(2)
 # params dictionary with model run parameters
 # TODO: Read from command line and allow overloading like `celeri`
 params = addict.Dict()
-params.n_time_steps = 100000
+params.n_time_steps = 4000
 params.time_step = 5e-7
 params.b_value = -1.0
 params.shear_modulus = 3e10
@@ -76,7 +76,9 @@ time_series.probability_weight = np.zeros_like(time_series.time)
 time_series.probability = np.zeros_like(time_series.time)
 time_series.event_magnitude = np.zeros_like(time_series.time)
 time_series.event_trigger_flag = np.zeros_like(time_series.time)
+time_series.cumulate_omori_effect = np.zeros_like(time_series.time)
 time_series.last_event_time = 0
+
 
 # TODO: create finite size version
 event_probability_list = []
@@ -182,6 +184,9 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
         )
 
         # Store Omori rate decay
+        time_series.cumulate_omori_effect += (
+            params.time_probability_history_scale_factor * omori_rate_perturbation
+        )
         event_probability_list.append(omori_rate_perturbation)
         time_series.omori_history_effect[
             :, 0
@@ -231,6 +236,23 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
             params.time_probability_history_scale_factor
             * event_probability_list[j][i + 1]
         )
+
+
+print(np.where(time_series.event_magnitude > 0)[0])
+plt.figure()
+plt.plot(
+    time_series.cumulate_omori_effect + mesh.mesh_geometric_moment_scalar_non_zero, "r+"
+)
+plt.plot(time_series.probability, "b.")
+
+# plt.semilogy(
+#     time_series.cumulate_omori_effect
+#     + mesh.mesh_geometric_moment_scalar_non_zero
+#     - time_series.probability,
+#     "r+",
+# )
+plt.show(block=False)
+
 
 end_time = datetime.datetime.now()
 print(f"Event sequence generation run time: {str(end_time - start_time)}")
