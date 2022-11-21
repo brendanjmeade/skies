@@ -2,11 +2,12 @@ import datetime
 import json
 import os
 import pickle
+import rich
 
 import addict
 import matplotlib.pyplot as plt
 import numpy as np
-from tqdm import tqdm
+from rich.progress import track
 
 import skies
 
@@ -102,7 +103,7 @@ skies.plot_initial_data(mesh.mesh, mesh.mesh_initial_dip_slip_deficit, output_fo
 
 # Main time loop
 start_time = datetime.datetime.now()
-for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
+for i in track(range(params.n_time_steps - 1), description="Event generation"):
     # Update mesh_geometric_moment
     mesh.mesh_geometric_moment += (
         params.time_step * mesh.mesh_interseismic_loading_rate * mesh.mesh.areas
