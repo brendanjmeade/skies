@@ -85,6 +85,20 @@ def suppress_stderr():
             sys.stderr = old_stderr
 
 
+@contextmanager
+def suppress_stdout():
+    """
+    https://stackoverflow.com/questions/4178614/suppressing-output-of-module-calling-outside-library
+    """
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
+
+
 # Read mesh data - List of dictionaries version
 def read_meshes(mesh_parameters_file_name):
     meshes = []
@@ -96,13 +110,15 @@ def read_meshes(mesh_parameters_file_name):
         if len(mesh_param) > 0:
             for i in range(len(mesh_param)):
                 meshes.append(addict.Dict())
-                with suppress_stderr():
-                    meshes[i].meshio_object = meshio.read(
-                        mesh_param[i]["mesh_filename"]
-                    )
+                with suppress_stdout():
+                    with suppress_stderr():
+                        meshes[i].meshio_object = meshio.read(
+                            mesh_param[i]["mesh_filename"]
+                        )
 
                 meshes[i].file_name = mesh_param[i]["mesh_filename"]
                 meshes[i].verts = meshes[i].meshio_object.get_cells_type("triangle")
+
                 # Expand mesh coordinates
                 meshes[i].lon1 = meshes[i].meshio_object.points[
                     meshes[i].verts[:, 0], 0
@@ -134,6 +150,7 @@ def read_meshes(mesh_parameters_file_name):
                 meshes[i].centroids = np.mean(
                     meshes[i].meshio_object.points[meshes[i].verts, :], axis=1
                 )
+
                 # Cartesian coordinates in meters
                 meshes[i].x1, meshes[i].y1, meshes[i].z1 = sph2cart(
                     meshes[i].lon1,
@@ -194,7 +211,6 @@ def read_meshes(mesh_parameters_file_name):
                     return np.cross(a, b)
 
                 meshes[i].nv = cross2(tri_leg1, tri_leg2)
-
                 azimuth, elevation, r = cart2sph(
                     meshes[i].nv[:, 0], meshes[i].nv[:, 1], meshes[i].nv[:, 2]
                 )
