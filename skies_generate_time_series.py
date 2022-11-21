@@ -8,6 +8,7 @@ import addict
 import matplotlib.pyplot as plt
 import numpy as np
 from rich.progress import track
+from rich.pretty import pprint
 
 import skies
 
