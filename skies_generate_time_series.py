@@ -223,24 +223,8 @@ for i in track(range(params.n_time_steps - 1), description="Event generation"):
     )
 
 
-print(np.where(time_series.event_magnitude > 0)[0])
-plt.figure()
-plt.plot(
-    time_series.cumulate_omori_effect + mesh.mesh_geometric_moment_scalar_non_zero, "r+"
-)
-plt.plot(time_series.probability, "b.")
-
-# plt.semilogy(
-#     time_series.cumulate_omori_effect
-#     + mesh.mesh_geometric_moment_scalar_non_zero
-#     - time_series.probability,
-#     "r+",
-# )
-plt.show(block=False)
-
-
 end_time = datetime.datetime.now()
-print(f"Event sequence generation run time: {str(end_time - start_time)}")
+print(f"Event sequence generation run time: {(end_time - start_time)}")
 
 # Save time_series dictionary to .pickle file in output_folder
 with open(output_folder + "/time_series.pickle", "wb") as pickle_file:

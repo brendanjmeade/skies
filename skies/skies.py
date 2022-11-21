@@ -1,8 +1,10 @@
 import datetime
 import json
 import os
+import sys
 import uuid
 import warnings
+from contextlib import contextmanager
 
 import addict
 import colorcet as cc
@@ -69,6 +71,20 @@ def triangle_area(triangles):
     return np.linalg.norm(triangle_normal(triangles), axis=1) / 2.0
 
 
+@contextmanager
+def suppress_stderr():
+    """
+    https://stackoverflow.com/questions/4178614/suppressing-output-of-module-calling-outside-library
+    """
+    with open(os.devnull, "w") as devnull:
+        old_stderr = sys.stderr
+        sys.stderr = devnull
+        try:
+            yield
+        finally:
+            sys.stderr = old_stderr
+
+
 # Read mesh data - List of dictionaries version
 def read_meshes(mesh_parameters_file_name):
     meshes = []
@@ -80,10 +96,13 @@ def read_meshes(mesh_parameters_file_name):
         if len(mesh_param) > 0:
             for i in range(len(mesh_param)):
                 meshes.append(addict.Dict())
-                meshes[i].meshio_object = meshio.read(mesh_param[i]["mesh_filename"])
+                with suppress_stderr():
+                    meshes[i].meshio_object = meshio.read(
+                        mesh_param[i]["mesh_filename"]
+                    )
+
                 meshes[i].file_name = mesh_param[i]["mesh_filename"]
                 meshes[i].verts = meshes[i].meshio_object.get_cells_type("triangle")
-
                 # Expand mesh coordinates
                 meshes[i].lon1 = meshes[i].meshio_object.points[
                     meshes[i].verts[:, 0], 0
