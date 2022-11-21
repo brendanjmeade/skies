@@ -22,9 +22,6 @@ np.random.seed(2)
 
 
 # TODO: Option for truncating eigenvalues (1000?)
-# TODO: Omori effect:
-# time_series.cumulative_omori_effect # For cumulative effect over loop
-# event.omori_effect # For individual contributions
 
 # params dictionary with model run parameters
 # TODO: Read from command line and allow overloading like `celeri`
@@ -69,7 +66,7 @@ params.initial_slip_deficit_rate_file = (
 with open(output_folder + "/params.json", "w") as params_output_file:
     json.dump(params, params_output_file)
 
-# Storage
+# Time-series storage
 time_series = addict.Dict()
 time_series.time = np.linspace(0, params.n_time_steps, params.n_time_steps)
 time_series.probability_weight = np.zeros_like(time_series.time)
@@ -80,12 +77,7 @@ time_series.cumulate_omori_effect = np.zeros_like(time_series.time)
 time_series.last_event_time = 0
 
 
-# TODO: create finite size version
-event_probability_list = []
-time_series.omori_history_effect = np.zeros(
-    (params.n_time_steps, params.n_events_omori_history_effect)
-)
-
+# Mesh storage
 mesh = addict.Dict()
 meshes = skies.read_meshes(params.mesh_parameters_file_name)
 mesh.mesh = meshes[params.mesh_index]
@@ -187,10 +179,6 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
         time_series.cumulate_omori_effect += (
             params.time_probability_history_scale_factor * omori_rate_perturbation
         )
-        event_probability_list.append(omori_rate_perturbation)
-        time_series.omori_history_effect[
-            :, 0
-        ] = omori_rate_perturbation  # Still need to implement below.
 
         # Update spatially variable mesh parameters
         mesh.mesh_geometric_moment -= event.slip_all_elements * mesh.mesh.areas
@@ -228,14 +216,10 @@ for i in tqdm(range(params.n_time_steps - 1), colour="cyan"):
     )
 
     # Update probability
-    time_series.probability[i + 1] = mesh.mesh_geometric_moment_scalar_non_zero[i + 1]
-
-    # Sum contribution from all past earthquakes
-    for j in range(len(event_probability_list)):
-        time_series.probability[i + 1] += (
-            params.time_probability_history_scale_factor
-            * event_probability_list[j][i + 1]
-        )
+    time_series.probability[i + 1] = (
+        time_series.cumulate_omori_effect[i]
+        + mesh.mesh_geometric_moment_scalar_non_zero[i]
+    )
 
 
 print(np.where(time_series.event_magnitude > 0)[0])
