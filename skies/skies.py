@@ -252,25 +252,25 @@ def read_meshes(mesh_parameters_file_name):
 
 
 def print_event(event, meshes):
-    print("Event data:")
-    print(
+    logger.info("Event data:")
+    logger.info(
         f"Hypocenter longitude = {meshes[0].centroids[event.hypocenter_triangle_index, 0][0]:0.4f} (deg)"
     )
-    print(
+    logger.info(
         f"Hypocenter latitude = {meshes[0].centroids[event.hypocenter_triangle_index, 1][0]:0.4f} (deg)"
     )
-    print(
+    logger.info(
         f"Hypocenter depth = {meshes[0].centroids[event.hypocenter_triangle_index, 2][0]:0.4f} (km)"
     )
-    print(f"Hypocenter triangle index = {event.hypocenter_triangle_index[0]}")
-    print(f"Mean slip = {np.mean(event.slip):0.2f} (m)")
-    print(f"Minimum slip = {np.min(event.slip):0.2f} (m)")
-    print(f"Maximum slip = {np.max(event.slip):0.2f} (m)")
-    print(f"Moment magnitude = {event.moment_magnitude[0]}")
-    print(f"Moment = {event.moment[0]:0.3} (N m)")
-    print(f"Number of eigenvalues = {event.n_eigenvalues}")
-    print(f"Rupture area = {event.actual_area / 1e6:0.2f} (km^2)")
-    print(f"Scaling law rupture area = {event.target_area[0] / 1e6:0.2f} (km^2)")
+    logger.info(f"Hypocenter triangle index = {event.hypocenter_triangle_index[0]}")
+    logger.info(f"Mean slip = {np.mean(event.slip):0.2f} (m)")
+    logger.info(f"Minimum slip = {np.min(event.slip):0.2f} (m)")
+    logger.info(f"Maximum slip = {np.max(event.slip):0.2f} (m)")
+    logger.info(f"Moment magnitude = {event.moment_magnitude[0]}")
+    logger.info(f"Moment = {event.moment[0]:0.3} (N m)")
+    logger.info(f"Number of eigenvalues = {event.n_eigenvalues}")
+    logger.info(f"Rupture area = {event.actual_area / 1e6:0.2f} (km^2)")
+    logger.info(f"Scaling law rupture area = {event.target_area[0] / 1e6:0.2f} (km^2)")
 
 
 def print_magnitude_overview(mesh):
@@ -294,24 +294,6 @@ def print_magnitude_overview(mesh):
     logger.info(
         f"Minimum moment magnitude of single mesh element = {minimum_single_triangle_moment_magnitude:0.2f}"
     )
-    # print(f"Maximum allowed moment magnitude = {MAXIMUM_EVENT_MOMENT_MAGNITUDE:0.2f}")
-    # print(f"Minimum allowed moment magnitude = {MINIMUM_EVENT_MOMENT_MAGNITUDE:0.2f}")
-
-    # if MINIMUM_EVENT_MOMENT_MAGNITUDE < minimum_single_triangle_moment_magnitude:
-    #     print(
-    #         "MINIMUM_EVENT_MOMENT_MAGNITUDE is less than minimum moment magnitude of single mesh"
-    #     )
-    #     print(
-    #         "WARNING: To avoid subgrid scale events increase MINIMUM_EVENT_MOMENT_MAGNITUDE"
-    #     )
-
-    # if maximum_moment_magnitude > MAXIMUM_EVENT_MOMENT_MAGNITUDE:
-    #     print(
-    #         f"Maximum moment magnitude of entire mesh ({maximum_moment_magnitude:0.2f}) exceeds MAXIMUM_EVENT_MOMENT_MAGNITUDE"
-    #     )
-    #     print(
-    #         f"WARNING: Events larger than {MAXIMUM_EVENT_MOMENT_MAGNITUDE:0.2f} will be clipped to {MAXIMUM_EVENT_MOMENT_MAGNITUDE:0.2f}"
-    #     )
 
 
 def create_event(meshes, probability):
@@ -1173,7 +1155,7 @@ def get_event_area_and_mean_slip(mesh, event):
     # In the case where event area larger than the area of the hypocentral triangle
     # then just have uniform slip on the single hypocentral triangle
     if event.target_area <= event.hypocenter_triangle_area:
-        # print("Target area is less than hypocenter triangle area")
+        logger.warning("Target area is less than hypocenter triangle area")
         event.actual_area = event.hypocenter_triangle_area
         event.triangle_index = event.hypocenter_triangle_index
         event.hypocenter_triangle_to_all_triangles_distances = np.array([])
@@ -1340,8 +1322,8 @@ def quick_plot_slip(mesh, event, params):
 def plot_event_select_eigenmodes(mesh, event, params):
     # Show eigenmodes for this event
     event.n_eigenvalues = event.triangle_index.size
-    print(f"Number of triangle mesh elements = {mesh.n_tde}")
-    print(f"Number of eigenvalues = {event.n_eigenvalues}")
+    logger.info(f"Number of triangle mesh elements = {mesh.n_tde}")
+    logger.info(f"Number of eigenvalues = {event.n_eigenvalues}")
 
     # Use Karhunen-Loeve to compute eigenvalues and eigenvectors
     eigenvalues, eigenvectors = get_eigenvalues_and_eigenvectors(
@@ -1402,7 +1384,7 @@ def plot_event_select_eigenmodes(mesh, event, params):
         elif n_eigenvalues < 10:
             if i >= n_eigenvalues:
                 break
-        print(f"Plotting mode {i}")
+        logger.info(f"Plotting mode {i}")
 
         # Select eigenmode to contour
         fill_value = np.zeros(mesh.n_tde)
