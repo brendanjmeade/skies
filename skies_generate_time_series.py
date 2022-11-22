@@ -1,14 +1,17 @@
 import datetime
 import json
+import logging
 import os
 import pickle
-import rich
 
 import addict
 import matplotlib.pyplot as plt
 import numpy as np
-from rich.progress import track
+import rich
+
+# from rich.logging import RichHandler
 from rich.pretty import pprint
+from rich.progress import track
 
 import skies
 
@@ -18,8 +21,9 @@ run_name = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 base_runs_folder = "./runs/"
 output_folder = os.path.join(base_runs_folder, run_name)
 skies.create_output_folder(base_runs_folder, output_folder)
-
-
+log_file_name = output_folder + "/" + run_name + ".log"
+logger = skies.get_logger(logging.INFO, log_file_name)
+logger.info("Test logging")
 np.random.seed(2)
 
 
@@ -28,7 +32,7 @@ np.random.seed(2)
 # params dictionary with model run parameters
 # TODO: Read from command line and allow overloading like `celeri`
 params = addict.Dict()
-params.n_time_steps = 4000
+params.n_time_steps = 1000
 params.time_step = 5e-7
 params.b_value = -1.0
 params.shear_modulus = 3e10
@@ -225,7 +229,7 @@ for i in track(range(params.n_time_steps - 1), description="Event generation"):
 
 
 end_time = datetime.datetime.now()
-print(f"Event sequence generation run time: {(end_time - start_time)}")
+logger.info(f"Event sequence generation run time: {(end_time - start_time)}")
 
 # Save time_series dictionary to .pickle file in output_folder
 with open(output_folder + "/time_series.pickle", "wb") as pickle_file:

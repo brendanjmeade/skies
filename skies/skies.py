@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import os
 import sys
 import uuid
@@ -14,6 +15,9 @@ import meshio
 import numpy as np
 import scipy
 from ismember import ismember
+from rich.logging import RichHandler
+
+logger = logging.getLogger(__name__)
 
 # Constants and parameters
 N_GRID_X = 500
@@ -280,7 +284,7 @@ def print_magnitude_overview(mesh):
         np.sum(mesh.areas)
     )
 
-    print("Magnitude overview:")
+    logger.info("Magnitude overview:")
     print(f"Maximum moment magnitude of entire mesh = {maximum_moment_magnitude:0.2f}")
     print(
         f"Maximum moment magnitude of single mesh element = {maximum_single_triangle_moment_magnitude:0.2f}"
@@ -1645,3 +1649,21 @@ def plot_probability_and_events_time_series(
     plt.gca().set_ylim(bottom=params.minimum_event_moment_magnitude)
     plt.savefig(output_folder + "/probability_magnitude" + ".pdf")
     plt.savefig(output_folder + "/probability_magnitude" + ".png", dpi=500)
+
+
+def get_logger(log_level, log_file_name):
+    logger = logging.getLogger(__name__)
+    while logger.hasHandlers():
+        logger.removeHandler(logger.handlers[0])
+    logger.setLevel(log_level)
+    shell_handler = RichHandler()
+    file_handler = logging.FileHandler(log_file_name)
+    shell_handler.setFormatter(logging.Formatter("%(message)s"))
+    file_handler.setFormatter(
+        logging.Formatter(
+            "%(levelname)s %(asctime)s [%(filename)s:%(funcName)s:%(lineno)d] %(message)s"
+        )
+    )
+    logger.addHandler(shell_handler)
+    logger.addHandler(file_handler)
+    return logger
