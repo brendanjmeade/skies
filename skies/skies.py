@@ -42,7 +42,7 @@ def create_output_folder(base_runs_folder, output_path):
         os.mkdir(base_runs_folder)
 
     # Make output folder for current run
-    print(f"Output folder: {output_path}")
+    # logger.info(f"Output folder: {output_path}")
     os.mkdir(output_path)
     os.mkdir(output_path + "/events")
 
@@ -109,7 +109,7 @@ def read_meshes(mesh_parameters_file_name):
     if mesh_parameters_file_name != "":
         with open(mesh_parameters_file_name) as f:
             mesh_param = json.load(f)
-            print(f"Read: {mesh_parameters_file_name}")
+            logger.info(f"Read: {mesh_parameters_file_name}")
 
         if len(mesh_param) > 0:
             for i in range(len(mesh_param)):
@@ -246,7 +246,7 @@ def read_meshes(mesh_parameters_file_name):
                 triangle_vertex_array[:, 2, 2] = meshes[i].z3
                 meshes[i].areas = triangle_area(triangle_vertex_array)
                 get_mesh_edge_elements(meshes)
-                print(f"Read: {mesh_param[i]['mesh_filename']}")
+                logger.info(f"Read: {mesh_param[i]['mesh_filename']}")
             get_mesh_perimeter(meshes)
     return meshes
 
@@ -284,12 +284,14 @@ def print_magnitude_overview(mesh):
         np.sum(mesh.areas)
     )
 
-    logger.info("Magnitude overview:")
-    print(f"Maximum moment magnitude of entire mesh = {maximum_moment_magnitude:0.2f}")
-    print(
+    logger.info("Magnitude analysis of mesh and area scaling relationships:")
+    logger.info(
+        f"Maximum moment magnitude of entire mesh = {maximum_moment_magnitude:0.2f}"
+    )
+    logger.info(
         f"Maximum moment magnitude of single mesh element = {maximum_single_triangle_moment_magnitude:0.2f}"
     )
-    print(
+    logger.info(
         f"Minimum moment magnitude of single mesh element = {minimum_single_triangle_moment_magnitude:0.2f}"
     )
     # print(f"Maximum allowed moment magnitude = {MAXIMUM_EVENT_MOMENT_MAGNITUDE:0.2f}")

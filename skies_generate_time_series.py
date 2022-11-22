@@ -23,7 +23,8 @@ output_folder = os.path.join(base_runs_folder, run_name)
 skies.create_output_folder(base_runs_folder, output_folder)
 log_file_name = output_folder + "/" + run_name + ".log"
 logger = skies.get_logger(logging.INFO, log_file_name)
-logger.info("Test logging")
+logger.info(f"Output folder: {output_folder}")
+
 np.random.seed(2)
 
 
