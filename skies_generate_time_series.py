@@ -64,6 +64,7 @@ params.min_latitude = 38.0
 params.max_latitude = 52.0
 params.n_contour_levels = 10
 params.min_contour_value = 0.1  # (m)
+params.write_event_pickle_files = False
 params.mesh_parameters_file_name = "./data/western_north_america_mesh_parameters.json"
 params.initial_slip_deficit_rate_file = (
     "./data/cascadia_low_resolution_tde_dip_slip_rates.npy"
@@ -81,8 +82,13 @@ time_series.probability = np.zeros_like(time_series.time)
 time_series.event_magnitude = np.zeros_like(time_series.time)
 time_series.event_trigger_flag = np.zeros_like(time_series.time)
 time_series.cumulate_omori_effect = np.zeros_like(time_series.time)
+time_series.event_longitude = np.zeros_like(time_series.time)
+time_series.event_latitude = np.zeros_like(time_series.time)
+time_series.event_depth = np.zeros_like(time_series.time)
+time_series.event_x = np.zeros_like(time_series.time)
+time_series.event_y = np.zeros_like(time_series.time)
+time_series.event_z = np.zeros_like(time_series.time)
 time_series.last_event_time = 0
-
 
 # Mesh storage
 mesh = addict.Dict()
@@ -155,6 +161,20 @@ for i in track(range(params.n_time_steps - 1), description="Event generation"):
             mesh.mesh.n_tde, params.n_samples, p=event.location_probability
         )[0]
 
+        # Store coordinates of central mesh element
+        time_series.event_longitude[i] = mesh.mesh.centroids[:, 0][
+            event.hypocenter_triangle_index
+        ]
+        time_series.event_latitude[i] = mesh.mesh.centroids[:, 1][
+            event.hypocenter_triangle_index
+        ]
+        time_series.event_depth[i] = mesh.mesh.centroids[:, 2][
+            event.hypocenter_triangle_index
+        ]
+        time_series.event_x[i] = mesh.mesh.x_centroid[event.hypocenter_triangle_index]
+        time_series.event_y[i] = mesh.mesh.y_centroid[event.hypocenter_triangle_index]
+        time_series.event_z[i] = mesh.mesh.z_centroid[event.hypocenter_triangle_index]
+
         # Generate coseismic slip area and slip distribution
         event = skies.get_event_area_slip_triangle_index(mesh.mesh, event)
         event.mesh_geometric_moment_pre_event = np.copy(
@@ -211,9 +231,10 @@ for i in track(range(params.n_time_steps - 1), description="Event generation"):
     event.mesh_initial_dip_slip_deficit = mesh.mesh_initial_dip_slip_deficit
 
     # Save event dictionary as pickle file
-    event_pickle_file_name = f"{output_folder}/events/event_{i:010.0f}.pickle"
-    with open(event_pickle_file_name, "wb") as pickle_file:
-        pickle.dump(event, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
+    if params.write_event_pickle_files:
+        event_pickle_file_name = f"{output_folder}/events/event_{i:010.0f}.pickle"
+        with open(event_pickle_file_name, "wb") as pickle_file:
+            pickle.dump(event, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
     # Save time step parameters as .vtk files for plotting with Paraview and pyvista
 
@@ -228,9 +249,11 @@ for i in track(range(params.n_time_steps - 1), description="Event generation"):
         + mesh.mesh_geometric_moment_scalar_non_zero[i]
     )
 
-
 end_time = datetime.datetime.now()
 logger.info(f"Event sequence generation run time: {(end_time - start_time)}")
+logger.info(
+    f"Generated {np.count_nonzero(time_series.event_magnitude)} events in {params.n_time_steps} time steps"
+)
 
 # Save time_series dictionary to .pickle file in output_folder
 with open(output_folder + "/time_series.pickle", "wb") as pickle_file:
