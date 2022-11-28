@@ -1655,14 +1655,89 @@ def get_logger(log_level, log_file_name):
 
 
 def parse_args():
-    # params.n_time_steps = 1000
-    # params.time_step = 5e-7
-    # params.b_value = -1.0
-    # params.shear_modulus = 3e10
-    # params.n_samples = 1
-    # params.n_binary = 2
-    # params.minimum_event_moment_magnitude = 5.5
-    # params.maximum_event_moment_magnitude = 9.0
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "params_file_name", type=str, help="Name of *_params.json file"
+    )
+    parser.add_argument(
+        "--mesh_parameters_file_name",
+        type=str,
+        default=None,
+        required=False,
+        help="Name of *_mesh_parameters.json file",
+    )
+    parser.add_argument(
+        "--initial_slip_deficit_rate_file",
+        type=str,
+        default=None,
+        required=False,
+        help="Name of *.npy file with slip deficit rates",
+    )
+    parser.add_argument(
+        "--write_event_pickle_files",
+        type=str,
+        default=None,
+        required=False,
+        help="Flag for saving each event as an individual .pickle file (0 or 1)",
+    )
+    parser.add_argument(
+        "--repl",
+        type=int,
+        default=0,
+        required=False,
+        help="Flag for dropping into REPL (0 or 1)",
+    )
+    parser.add_argument(
+        "--pickle_save",
+        type=int,
+        default=0,
+        required=False,
+        help="Flag for saving major data structures in pickle file (0 | 1)",
+    )
+    parser.add_argument(
+        "--n_time_steps",
+        type=int,
+        default=10000,
+        required=False,
+        help="Number of time steps",
+    )
+    parser.add_argument(
+        "--time_step",
+        type=int,
+        default=1,
+        required=False,
+        help="Time step duration",
+    )
+    parser.add_argument(
+        "--b_value",
+        type=int,
+        default=-1,
+        required=False,
+        help="Gutenberg-Richter b-value",
+    )
+    parser.add_argument(
+        "--shear_modulus",
+        type=int,
+        default=3e10,
+        required=False,
+        help="Shear modulus (Pa)",
+    )
+    parser.add_argument(
+        "--minimum_event_moment_magnitude",
+        type=int,
+        default=3e10,
+        required=False,
+        help="Minimum event size (moment magnitude)",
+    )
+    parser.add_argument(
+        "--maximum_event_moment_magnitude",
+        type=int,
+        default=3e10,
+        required=False,
+        help="Maximum event size (moment magnitude)",
+    )
+
+
     # params.time_probability_amplitude_scale_factor = 5e-2
     # params.time_probability_data_scale_factor = 1e-12
     # params.area_scaling = 1.25
@@ -1676,62 +1751,5 @@ def parse_args():
     # params.mesh_index = 0
     # params.initial_mesh_slip_deficit_scaling = 0.0
     # params.geometic_moment_rate_scale_factor = 5e1
-    # params.plot_events_in_loop = True
-    # params.n_events_omori_history_effect = 100
-    # params.n_grid_longitude = 500
-    # params.n_grid_latitude = 500
-    # params.min_longitude = 239.0
-    # params.max_longitude = 231.0
-    # params.min_latitude = 38.0
-    # params.max_latitude = 52.0
-    # params.n_contour_levels = 10
-    # params.min_contour_value = 0.1  # (m)
-    # params.write_event_pickle_files = False
-    # params.mesh_parameters_file_name = "./data/western_north_america_mesh_parameters.json"
-    # params.initial_slip_deficit_rate_file = (
-    #     "./data/cascadia_low_resolution_tde_dip_slip_rates.npy"
-    # )
-
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "params_file_name", type=str, help="Name of *_params.json file"
-    )
-    parser.add_argument(
-        "--segment_file_name",
-        type=str,
-        default=None,
-        required=False,
-        help="Name of *_segment.csv file",
-    )
-    parser.add_argument(
-        "--mesh_parameters_file_name",
-        type=str,
-        default=None,
-        required=False,
-        help="Name of *_mesh_parameters.json file",
-    )
-    parser.add_argument(
-        "--solve_type",
-        type=str,
-        default=None,
-        required=False,
-        help="Solution type (dense | hmatrix)",
-    )
-    parser.add_argument(
-        "--repl",
-        type=int,
-        default=0,
-        required=False,
-        help="Flag for dropping into REPL (0 | 1)",
-    )
-    parser.add_argument(
-        "--pickle_save",
-        type=int,
-        default=0,
-        required=False,
-        help="Flag for saving major data structures in pickle file (0 | 1)",
-    )
-
     args = addict.Dict(vars(parser.parse_args()))
     return args
