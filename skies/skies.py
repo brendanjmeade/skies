@@ -1683,73 +1683,149 @@ def parse_args():
     parser.add_argument(
         "--repl",
         type=int,
-        default=0,
+        default=None,
         required=False,
         help="Flag for dropping into REPL (0 or 1)",
     )
     parser.add_argument(
         "--pickle_save",
         type=int,
-        default=0,
+        default=None,
         required=False,
         help="Flag for saving major data structures in pickle file (0 | 1)",
     )
     parser.add_argument(
         "--n_time_steps",
         type=int,
-        default=10000,
+        default=None,
         required=False,
         help="Number of time steps",
     )
     parser.add_argument(
         "--time_step",
-        type=int,
-        default=1,
+        type=float,
+        default=None,
         required=False,
         help="Time step duration",
     )
     parser.add_argument(
         "--b_value",
-        type=int,
-        default=-1,
+        type=float,
+        default=None,
         required=False,
         help="Gutenberg-Richter b-value",
     )
     parser.add_argument(
         "--shear_modulus",
-        type=int,
-        default=3e10,
+        type=float,
+        default=None,
         required=False,
         help="Shear modulus (Pa)",
     )
     parser.add_argument(
         "--minimum_event_moment_magnitude",
-        type=int,
-        default=3e10,
+        type=float,
+        default=None,
         required=False,
         help="Minimum event size (moment magnitude)",
     )
     parser.add_argument(
         "--maximum_event_moment_magnitude",
-        type=int,
-        default=3e10,
+        type=float,
+        default=None,
         required=False,
         help="Maximum event size (moment magnitude)",
     )
-
-
-    # params.time_probability_amplitude_scale_factor = 5e-2
-    # params.time_probability_data_scale_factor = 1e-12
-    # params.area_scaling = 1.25
-    # params.default_omori_decay_time = 100.0
-    # params.minimum_probability = 1e-10
-    # params.time_probability_history_scale_factor = 1e11
-    # params.location_probability_amplitude_scale_factor = 1.0
-    # params.location_probability_data_scale_factor = 1e-5
-    # params.omori_amplitude_scale_factor = 3e-9
-    # params.omori_rate_perturbation_scale_factor = 1e-1
-    # params.mesh_index = 0
-    # params.initial_mesh_slip_deficit_scaling = 0.0
-    # params.geometic_moment_rate_scale_factor = 5e1
+    parser.add_argument(
+        "--time_probability_amplitude_scale_factor",
+        type=float,
+        default=None,
+        required=False,
+        help="Time probability amplitude scale factor",
+    )
+    parser.add_argument(
+        "--time_probability_data_scale_factor",
+        type=float,
+        default=None,
+        required=False,
+        help="Time probability data scale factor",
+    )
+    parser.add_argument(
+        "--area_scaling",
+        type=float,
+        default=None,
+        required=False,
+        help="Event area scaling factor",
+    )
+    parser.add_argument(
+        "--default_omori_decay_time",
+        type=int,
+        default=None,
+        required=False,
+        help="Default (reference) Omori decay time",
+    )
+    parser.add_argument(
+        "--minimum_probability",
+        type=float,
+        default=None,
+        required=False,
+        help="Minimum time probability",
+    )
+    parser.add_argument(
+        "--time_probability_history_scale_factor",
+        type=float,
+        default=None,
+        required=False,
+        help="Time probability history scale factor",
+    )
+    parser.add_argument(
+        "--location_probability_amplitude_scale_factor",
+        type=float,
+        default=None,
+        required=False,
+        help="Location probability amplitude scale factor",
+    )
+    parser.add_argument(
+        "--location_probability_data_scale_factor",
+        type=float,
+        default=None,
+        required=False,
+        help="Location probability data scale factor",
+    )
+    parser.add_argument(
+        "--omori_amplitude_scale_factor",
+        type=float,
+        default=None,
+        required=False,
+        help="Omori amplitude scale factor",
+    )
+    parser.add_argument(
+        "--omori_rate_perturbation_scale_factor",
+        type=float,
+        default=None,
+        required=False,
+        help="Omori rate perturbation scale factor",
+    )
+    parser.add_argument(
+        "--mesh_index",
+        type=int,
+        default=None,
+        required=False,
+        help="Mesh index",
+    )
+    parser.add_argument(
+        "--initial_mesh_slip_deficit_scaling",
+        type=float,
+        default=None,
+        required=False,
+        help="initial_mesh_slip_deficit_scaling",
+    )
+    parser.add_argument(
+        "--geometic_moment_rate_scale_factor",
+        type=float,
+        default=None,
+        required=False,
+        help="geometic_moment_rate_scale_factor",
+    )
     args = addict.Dict(vars(parser.parse_args()))
     return args
