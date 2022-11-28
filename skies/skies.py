@@ -1655,6 +1655,44 @@ def get_logger(log_level, log_file_name):
 
 
 def parse_args():
+    # params.n_time_steps = 1000
+    # params.time_step = 5e-7
+    # params.b_value = -1.0
+    # params.shear_modulus = 3e10
+    # params.n_samples = 1
+    # params.n_binary = 2
+    # params.minimum_event_moment_magnitude = 5.5
+    # params.maximum_event_moment_magnitude = 9.0
+    # params.time_probability_amplitude_scale_factor = 5e-2
+    # params.time_probability_data_scale_factor = 1e-12
+    # params.area_scaling = 1.25
+    # params.default_omori_decay_time = 100.0
+    # params.minimum_probability = 1e-10
+    # params.time_probability_history_scale_factor = 1e11
+    # params.location_probability_amplitude_scale_factor = 1.0
+    # params.location_probability_data_scale_factor = 1e-5
+    # params.omori_amplitude_scale_factor = 3e-9
+    # params.omori_rate_perturbation_scale_factor = 1e-1
+    # params.mesh_index = 0
+    # params.initial_mesh_slip_deficit_scaling = 0.0
+    # params.geometic_moment_rate_scale_factor = 5e1
+    # params.plot_events_in_loop = True
+    # params.n_events_omori_history_effect = 100
+    # params.n_grid_longitude = 500
+    # params.n_grid_latitude = 500
+    # params.min_longitude = 239.0
+    # params.max_longitude = 231.0
+    # params.min_latitude = 38.0
+    # params.max_latitude = 52.0
+    # params.n_contour_levels = 10
+    # params.min_contour_value = 0.1  # (m)
+    # params.write_event_pickle_files = False
+    # params.mesh_parameters_file_name = "./data/western_north_america_mesh_parameters.json"
+    # params.initial_slip_deficit_rate_file = (
+    #     "./data/cascadia_low_resolution_tde_dip_slip_rates.npy"
+    # )
+
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "params_file_name", type=str, help="Name of *_params.json file"
