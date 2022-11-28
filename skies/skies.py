@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import json
 import logging
@@ -1651,3 +1652,48 @@ def get_logger(log_level, log_file_name):
     logger.addHandler(shell_handler)
     logger.addHandler(file_handler)
     return logger
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "params_file_name", type=str, help="Name of *_params.json file"
+    )
+    parser.add_argument(
+        "--segment_file_name",
+        type=str,
+        default=None,
+        required=False,
+        help="Name of *_segment.csv file",
+    )
+    parser.add_argument(
+        "--mesh_parameters_file_name",
+        type=str,
+        default=None,
+        required=False,
+        help="Name of *_mesh_parameters.json file",
+    )
+    parser.add_argument(
+        "--solve_type",
+        type=str,
+        default=None,
+        required=False,
+        help="Solution type (dense | hmatrix)",
+    )
+    parser.add_argument(
+        "--repl",
+        type=int,
+        default=0,
+        required=False,
+        help="Flag for dropping into REPL (0 | 1)",
+    )
+    parser.add_argument(
+        "--pickle_save",
+        type=int,
+        default=0,
+        required=False,
+        help="Flag for saving major data structures in pickle file (0 | 1)",
+    )
+
+    args = addict.Dict(vars(parser.parse_args()))
+    return args
