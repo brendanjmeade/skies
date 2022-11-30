@@ -5,9 +5,9 @@ import os
 import pickle
 
 import addict
+import h5py
 import matplotlib.pyplot as plt
 import numpy as np
-import rich
 import IPython
 
 # from rich.logging import RichHandler
@@ -17,6 +17,7 @@ from rich.progress import track
 import skies
 
 plt.close("all")
+
 
 def main(args):
     run_name = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
@@ -29,13 +30,12 @@ def main(args):
 
     np.random.seed(2)
 
-
     # TODO: Option for truncating eigenvalues (1000?)
 
     # params dictionary with model run parameters
     # TODO: Read from command line and allow overloading like `celeri`
     params = addict.Dict()
-    params.n_time_steps = 1000
+    params.n_time_steps = 100000
     params.time_step = 5e-7
     params.b_value = -1.0
     params.shear_modulus = 3e10
@@ -67,7 +67,9 @@ def main(args):
     params.n_contour_levels = 10
     params.min_contour_value = 0.1  # (m)
     params.write_event_pickle_files = False
-    params.mesh_parameters_file_name = "./data/western_north_america_mesh_parameters.json"
+    params.mesh_parameters_file_name = (
+        "./data/western_north_america_mesh_parameters.json"
+    )
     params.initial_slip_deficit_rate_file = (
         "./data/cascadia_low_resolution_tde_dip_slip_rates.npy"
     )
@@ -111,9 +113,33 @@ def main(args):
         params.geometic_moment_rate_scale_factor * mesh.mesh_initial_dip_slip_deficit
     )
 
+    # TODO: Write vtk file with geometry only
+    vtk_file_name = output_folder + "/" + run_name + "_mesh_geometry.vtk"
+    skies.write_vtk_file(mesh.mesh, np.zeros(mesh.mesh.n_tde), "none", vtk_file_name)
+
+    # Open HDF file and create groups for saving data
+    hdf_file_name = output_folder + "/" + run_name + ".hdf"
+    hdf_file = h5py.File(hdf_file_name, "w")
+    hdf_dataset_cumulative_event_slip = hdf_file.create_dataset(
+        "cumulative_slip",
+        shape=(params.n_time_steps, mesh.mesh.n_tde),
+        dtype=float,
+    )
+    hdf_dataset_geometric_moment = hdf_file.create_dataset(
+        "geometric_moment", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
+    )
+    hdf_dataset_last_event_slip = hdf_file.create_dataset(
+        "last_event_slip", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
+    )
+    hdf_dataset_loading_rate = hdf_file.create_dataset(
+        "loading_rate", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
+    )
+
     # Display information about initial mesh and slip deficit rates
     skies.print_magnitude_overview(mesh.mesh)
-    skies.plot_initial_data(mesh.mesh, mesh.mesh_initial_dip_slip_deficit, output_folder)
+    skies.plot_initial_data(
+        mesh.mesh, mesh.mesh_initial_dip_slip_deficit, output_folder
+    )
 
     # Main time loop
     start_time = datetime.datetime.now()
@@ -136,7 +162,10 @@ def main(args):
         time_series.event_trigger_flag[i] = np.random.choice(
             params.n_binary,
             params.n_samples,
-            p=[1 - time_series.probability_weight[i], time_series.probability_weight[i]],
+            p=[
+                1 - time_series.probability_weight[i],
+                time_series.probability_weight[i],
+            ],
         )
 
         if bool(time_series.event_trigger_flag[i]):
@@ -173,9 +202,15 @@ def main(args):
             time_series.event_depth[i] = mesh.mesh.centroids[:, 2][
                 event.hypocenter_triangle_index
             ]
-            time_series.event_x[i] = mesh.mesh.x_centroid[event.hypocenter_triangle_index]
-            time_series.event_y[i] = mesh.mesh.y_centroid[event.hypocenter_triangle_index]
-            time_series.event_z[i] = mesh.mesh.z_centroid[event.hypocenter_triangle_index]
+            time_series.event_x[i] = mesh.mesh.x_centroid[
+                event.hypocenter_triangle_index
+            ]
+            time_series.event_y[i] = mesh.mesh.y_centroid[
+                event.hypocenter_triangle_index
+            ]
+            time_series.event_z[i] = mesh.mesh.z_centroid[
+                event.hypocenter_triangle_index
+            ]
 
             # Generate coseismic slip area and slip distribution
             event = skies.get_event_area_slip_triangle_index(mesh.mesh, event)
@@ -200,9 +235,9 @@ def main(args):
             )
 
             # Coseismic offset to Omori rate effect
-            omori_rate_perturbation[np.where(time_series.time > time_series.time[i])] -= (
-                event.omori_amplitude * params.omori_rate_perturbation_scale_factor
-            )
+            omori_rate_perturbation[
+                np.where(time_series.time > time_series.time[i])
+            ] -= (event.omori_amplitude * params.omori_rate_perturbation_scale_factor)
 
             # Store Omori rate decay
             time_series.cumulate_omori_effect += (
@@ -224,7 +259,11 @@ def main(args):
             )
             event.mesh_geometric_moment_post_event = (
                 mesh.mesh_geometric_moment_pre_event
-                + (params.time_step * mesh.mesh_interseismic_loading_rate * mesh.mesh.areas)
+                + (
+                    params.time_step
+                    * mesh.mesh_interseismic_loading_rate
+                    * mesh.mesh.areas
+                )
             )
             event.mesh_last_event_slip = mesh.mesh_last_event_slip
             event.mesh_total_slip = mesh.mesh_total_slip
@@ -232,13 +271,17 @@ def main(args):
         # TODO: Check this???
         event.mesh_initial_dip_slip_deficit = mesh.mesh_initial_dip_slip_deficit
 
-        # Save event dictionary as pickle file
+        # Save event dictionary as pickle file TODO: Move up so that i's nonzero events only
         if params.write_event_pickle_files:
             event_pickle_file_name = f"{output_folder}/events/event_{i:010.0f}.pickle"
             with open(event_pickle_file_name, "wb") as pickle_file:
                 pickle.dump(event, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
-        # Save time step parameters as .vtk files for plotting with Paraview and pyvista
+        # Save mesh values to HDF file
+        hdf_dataset_cumulative_event_slip[i, :] = mesh.mesh_total_slip
+        hdf_dataset_last_event_slip[i, :] = mesh.mesh_last_event_slip
+        hdf_dataset_geometric_moment[i, :] = mesh.mesh_geometric_moment
+        hdf_dataset_loading_rate[i, :] = mesh.mesh_initial_dip_slip_deficit
 
         # Pre-event moment for next time step
         mesh.mesh_geometric_moment_pre_event = np.copy(
@@ -250,6 +293,9 @@ def main(args):
             time_series.cumulate_omori_effect[i]
             + mesh.mesh_geometric_moment_scalar_non_zero[i]
         )
+
+    # TODO: Close hdf file
+    hdf_file.close()
 
     end_time = datetime.datetime.now()
     logger.info(f"Event sequence generation run time: {(end_time - start_time)}")
@@ -267,7 +313,9 @@ def main(args):
 
     # Save random state to .pickle file in output_folder
     with open(output_folder + "/random_state.pickle", "wb") as pickle_file:
-        pickle.dump(np.random.get_state(), pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(
+            np.random.get_state(), pickle_file, protocol=pickle.HIGHEST_PROTOCOL
+        )
 
     # Plot time probability and event moment magnitude time series
     start_idx = 0
