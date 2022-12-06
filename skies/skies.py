@@ -1147,8 +1147,25 @@ def get_triangle_index_closest_to_hypocenter(
     return hypocenter_triangle_index
 
 
+# def moment_magnitude_to_moment(moment_magnitude):
+#     moment = 10 ** (1.5 * (moment_magnitude + 10.7) - 7.0)
+#     return moment
+
+def moment_to_moment_magnitude(moment):
+    """
+    Convert moment to moment magnitude
+    Assumes MKS units
+    """
+    moment_magnitude = 2.0 / 3.0 * (np.log10(moment) - 9.05)
+    return moment_magnitude
+
+
 def moment_magnitude_to_moment(moment_magnitude):
-    moment = 10 ** (1.5 * (moment_magnitude + 10.7) - 7.0)
+    """
+    Convert moment magnitude to moment
+    Assumes MKS units
+    """
+    moment = 10 ** (3.0 / 2.0 * moment_magnitude + 9.05)
     return moment
 
 
