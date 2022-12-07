@@ -1151,6 +1151,7 @@ def get_triangle_index_closest_to_hypocenter(
 #     moment = 10 ** (1.5 * (moment_magnitude + 10.7) - 7.0)
 #     return moment
 
+
 def moment_to_moment_magnitude(moment):
     """
     Convert moment to moment magnitude
@@ -1673,9 +1674,7 @@ def get_logger(log_level, log_file_name):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "params_file_name", type=str, help="Name of *_params.json file"
-    )
+    parser.add_argument("params_file_name", type=str, help="Name of *_params.json file")
     parser.add_argument(
         "--mesh_parameters_file_name",
         type=str,
@@ -1846,3 +1845,29 @@ def parse_args():
     )
     args = addict.Dict(vars(parser.parse_args()))
     return args
+
+
+def get_params(params_file_name):
+    """Read *params.json file and return contents as a dictionary
+
+    Args:
+        params_file_name (string): Path to params file
+
+    Returns:
+        params (Dict): Dictionary with content of params file
+    """
+    with open(params_file_name, "r") as f:
+        params = json.load(f)
+    params = addict.Dict(params)  # Convert to dot notation dictionary
+    params.file_name = params_file_name
+
+    # Add run_name and output_path
+    params.run_name = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    params.output_path = os.path.join(params.base_runs_folder, params.run_name)
+    params.file_name = params
+
+    # Sort command keys alphabetically for readability
+    # TODO: This works fine for celeri but not here???
+    # It generates some sort of addict infinite recursion error???
+    # params = addict.Dict(sorted(params.items()))
+    return params

@@ -20,6 +20,11 @@ plt.close("all")
 
 
 def main(args):
+    # IPython.embed(banner1="")
+    params_test = skies.get_params(args.params_file_name)
+    # params_test = addict.Dict(sorted(params_test.items()))
+    print(f"{params_test=}")
+
     run_name = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     base_runs_folder = "./runs/"
     output_folder = os.path.join(base_runs_folder, run_name)
@@ -35,7 +40,7 @@ def main(args):
     # params dictionary with model run parameters
     # TODO: Read from command line and allow overloading like `celeri`
     params = addict.Dict()
-    params.n_time_steps = 100000
+    params.n_time_steps = 1000
     params.time_step = 5e-7
     params.b_value = -1.0
     params.shear_modulus = 3e10
