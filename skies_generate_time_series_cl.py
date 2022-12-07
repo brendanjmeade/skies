@@ -21,7 +21,9 @@ plt.close("all")
 
 def main(args):
     params_test = skies.get_params(args.params_file_name)
-    print(f"{params_test=}")
+    # print(f"{params_test=}")
+
+    # command = celeri.get_command(args.command_file_name)
     # celeri.create_output_folder(command)
     # celeri.get_logger(command)
     # celeri.process_args(command, args)
