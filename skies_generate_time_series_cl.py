@@ -20,21 +20,18 @@ plt.close("all")
 
 
 def main(args):
-    params_test = skies.get_params(args.params_file_name)
-    # print(f"{params_test=}")
-
     # command = celeri.get_command(args.command_file_name)
     # celeri.create_output_folder(command)
     # celeri.get_logger(command)
     # celeri.process_args(command, args)
-
-    run_name = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-    base_runs_folder = "./runs/"
-    output_folder = os.path.join(base_runs_folder, run_name)
-    skies.create_output_folder(base_runs_folder, output_folder)
-    log_file_name = output_folder + "/" + run_name + ".log"
-    logger = skies.get_logger(logging.INFO, log_file_name)
-    logger.info(f"Output folder: {output_folder}")
+    print()
+    params_test = skies.get_params(args.params_file_name)
+    skies.create_output_folder(params_test.base_runs_folder, params_test.output_folder)
+    params_test.log_file_name = (
+        params_test.output_folder + "/" + params_test.run_name + ".log"
+    )
+    logger = skies.get_logger(logging.INFO, params_test.log_file_name)
+    logger.info(f"Output folder: {params_test.output_folder}")
 
     np.random.seed(2)
 
@@ -47,8 +44,8 @@ def main(args):
     params.time_step = 5e-7
     params.b_value = -1.0
     params.shear_modulus = 3e10
-    params.n_samples = 1
-    params.n_binary = 2
+    params.n_samples = 1  # TODO: remove?
+    params.n_binary = 2  # TODO: remove?
     params.minimum_event_moment_magnitude = 5.5
     params.maximum_event_moment_magnitude = 9.0
     params.time_probability_amplitude_scale_factor = 5e-2
@@ -83,7 +80,7 @@ def main(args):
     )
 
     # Save params dictionary to .json file in output_folder
-    with open(output_folder + "/params.json", "w") as params_output_file:
+    with open(params_test.output_folder + "/params.json", "w") as params_output_file:
         json.dump(params, params_output_file)
 
     # Time-series storage
@@ -122,11 +119,11 @@ def main(args):
     )
 
     # TODO: Write vtk file with geometry only
-    vtk_file_name = output_folder + "/" + run_name + "_mesh_geometry.vtk"
+    vtk_file_name = params_test.output_folder + "/" + params_test.run_name + "_mesh_geometry.vtk"
     skies.write_vtk_file(mesh.mesh, np.zeros(mesh.mesh.n_tde), "none", vtk_file_name)
 
     # Open HDF file and create groups for saving data
-    hdf_file_name = output_folder + "/" + run_name + ".hdf"
+    hdf_file_name = params_test.output_folder + "/" + params_test.run_name + ".hdf"
     hdf_file = h5py.File(hdf_file_name, "w")
     hdf_dataset_cumulative_event_slip = hdf_file.create_dataset(
         "cumulative_slip",
@@ -146,7 +143,7 @@ def main(args):
     # Display information about initial mesh and slip deficit rates
     skies.print_magnitude_overview(mesh.mesh)
     skies.plot_initial_data(
-        mesh.mesh, mesh.mesh_initial_dip_slip_deficit, output_folder
+        mesh.mesh, mesh.mesh_initial_dip_slip_deficit, params_test.output_folder
     )
 
     # Main time loop
@@ -281,7 +278,7 @@ def main(args):
 
         # Save event dictionary as pickle file TODO: Move up so that i's nonzero events only
         if params.write_event_pickle_files:
-            event_pickle_file_name = f"{output_folder}/events/event_{i:010.0f}.pickle"
+            event_pickle_file_name = f"{params_test.output_folder}/events/event_{i:010.0f}.pickle"
             with open(event_pickle_file_name, "wb") as pickle_file:
                 pickle.dump(event, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -312,15 +309,15 @@ def main(args):
     )
 
     # Save time_series dictionary to .pickle file in output_folder
-    with open(output_folder + "/time_series.pickle", "wb") as pickle_file:
+    with open(params_test.output_folder + "/time_series.pickle", "wb") as pickle_file:
         pickle.dump(time_series, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
     # Save mesh dictionary to .pickle file in output_folder
-    with open(output_folder + "/mesh.pickle", "wb") as pickle_file:
+    with open(params_test.output_folder + "/mesh.pickle", "wb") as pickle_file:
         pickle.dump(mesh, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
     # Save random state to .pickle file in output_folder
-    with open(output_folder + "/random_state.pickle", "wb") as pickle_file:
+    with open(params_test.output_folder + "/random_state.pickle", "wb") as pickle_file:
         pickle.dump(
             np.random.get_state(), pickle_file, protocol=pickle.HIGHEST_PROTOCOL
         )
@@ -330,7 +327,7 @@ def main(args):
     end_idx = time_series.time.size
     skies.plot_probability_and_events_time_series(
         params,
-        output_folder,
+        params_test.output_folder,
         time_series,
         start_idx,
         end_idx,
