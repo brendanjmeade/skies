@@ -24,14 +24,9 @@ def main(args):
     # celeri.create_output_folder(command)
     # celeri.get_logger(command)
     # celeri.process_args(command, args)
-    print()
     params_test = skies.get_params(args.params_file_name)
     skies.create_output_folder(params_test.base_runs_folder, params_test.output_folder)
-    params_test.log_file_name = (
-        params_test.output_folder + "/" + params_test.run_name + ".log"
-    )
-    logger = skies.get_logger(logging.INFO, params_test.log_file_name)
-    logger.info(f"Output folder: {params_test.output_folder}")
+    logger = skies.get_logger(logging.INFO, params_test)
 
     np.random.seed(2)
 

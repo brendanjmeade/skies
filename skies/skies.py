@@ -1654,13 +1654,17 @@ def plot_probability_and_events_time_series(
     plt.savefig(output_folder + "/probability_magnitude" + ".png", dpi=500)
 
 
-def get_logger(log_level, log_file_name):
+def get_logger(log_level, params):
+    params.log_file_name = (
+        params.output_folder + "/" + params.run_name + ".log"
+    )
+
     logger = logging.getLogger(__name__)
     while logger.hasHandlers():
         logger.removeHandler(logger.handlers[0])
     logger.setLevel(log_level)
     shell_handler = RichHandler()
-    file_handler = logging.FileHandler(log_file_name)
+    file_handler = logging.FileHandler(params.log_file_name)
     shell_handler.setFormatter(logging.Formatter("%(message)s"))
     file_handler.setFormatter(
         logging.Formatter(
@@ -1669,6 +1673,7 @@ def get_logger(log_level, log_file_name):
     )
     logger.addHandler(shell_handler)
     logger.addHandler(file_handler)
+    logger.info(f"Output folder: {params.output_folder}")
     return logger
 
 
@@ -1869,3 +1874,17 @@ def get_params(params_file_name):
     # Sort command keys alphabetically for readability
     params = addict.Dict(sorted(params.items()))
     return params
+
+
+# def get_logger(params):
+#     """
+#     I
+#     """
+
+#     params_test.log_file_name = (
+#         params_test.output_folder + "/" + params_test.run_name + ".log"
+#     )
+#     logger = skies.get_logger(logging.INFO, params_test.log_file_name)
+#     logger.info(f"Output folder: {params_test.output_folder}")
+    
+#     return logger
