@@ -2161,4 +2161,3 @@ def time_step_loop(params, time_series, mesh):
     logger.info(
         f"Generated {np.count_nonzero(time_series.event_magnitude)} events in {params.n_time_steps} time steps"
     )
-    # return time_series, mesh
