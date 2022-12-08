@@ -30,8 +30,6 @@ def main(args):
 
     np.random.seed(2)
 
-    # TODO: Option for truncating eigenvalues (1000?)
-
     # params dictionary with model run parameters
     # TODO: Read from command line and allow overloading like `celeri`
     params = addict.Dict()
@@ -39,8 +37,8 @@ def main(args):
     params.time_step = 5e-7
     params.b_value = -1.0
     params.shear_modulus = 3e10
-    params.n_samples = 1  # TODO: remove?
-    params.n_binary = 2  # TODO: remove?
+    params.n_samples = 1
+    params.n_binary = 2
     params.minimum_event_moment_magnitude = 5.5
     params.maximum_event_moment_magnitude = 9.0
     params.time_probability_amplitude_scale_factor = 5e-2
