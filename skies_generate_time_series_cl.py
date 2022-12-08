@@ -27,6 +27,7 @@ def main(args):
     params_test = skies.get_params(args.params_file_name)
     skies.create_output_folder(params_test.base_runs_folder, params_test.output_folder)
     logger = skies.get_logger(logging.INFO, params_test)
+    skies.process_args(params_test, args)
 
     np.random.seed(2)
 

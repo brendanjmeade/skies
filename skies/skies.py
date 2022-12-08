@@ -1871,20 +1871,17 @@ def get_params(params_file_name):
     params.output_path = os.path.join(params.base_runs_folder, params.run_name)
     params.output_folder = os.path.join(params.base_runs_folder, params.run_name)
 
-    # Sort command keys alphabetically for readability
+    # Sort params keys alphabetically for readability
     params = addict.Dict(sorted(params.items()))
     return params
 
 
-# def get_logger(params):
-#     """
-#     I
-#     """
-
-#     params_test.log_file_name = (
-#         params_test.output_folder + "/" + params_test.run_name + ".log"
-#     )
-#     logger = skies.get_logger(logging.INFO, params_test.log_file_name)
-#     logger.info(f"Output folder: {params_test.output_folder}")
-    
-#     return logger
+def process_args(params, args):
+    for key in params:
+        if key in args:
+            if args[key] is not None:
+                logger.warning(f"ORIGINAL: params.{key}: {params[key]}")
+                params[key] = args[key]
+                logger.warning(f"REPLACED: params.{key}: {params[key]}")
+            else:
+                logger.info(f"params.{key}: {params[key]}")
