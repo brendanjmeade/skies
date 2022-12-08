@@ -20,57 +20,57 @@ plt.close("all")
 
 
 def main(args):
-    params_test = skies.get_params(args.params_file_name)
-    skies.create_output_folder(params_test.base_runs_folder, params_test.output_folder)
-    logger = skies.get_logger(logging.INFO, params_test)
-    skies.process_args(params_test, args)
+    params = skies.get_params(args.params_file_name)
+    skies.create_output_folder(params.base_runs_folder, params.output_folder)
+    logger = skies.get_logger(logging.INFO, params)
+    skies.process_args(params, args)
 
     np.random.seed(2)
 
     # params dictionary with model run parameters
     # TODO: Read from command line and allow overloading like `celeri`
-    params = addict.Dict()
-    params.n_time_steps = 1000
-    params.time_step = 5e-7
-    params.b_value = -1.0
-    params.shear_modulus = 3e10
-    params.n_samples = 1
-    params.n_binary = 2
-    params.minimum_event_moment_magnitude = 5.5
-    params.maximum_event_moment_magnitude = 9.0
-    params.time_probability_amplitude_scale_factor = 5e-2
-    params.time_probability_data_scale_factor = 1e-12
-    params.area_scaling = 1.25
-    params.default_omori_decay_time = 100.0
-    params.minimum_probability = 1e-10
-    params.time_probability_history_scale_factor = 1e11
-    params.location_probability_amplitude_scale_factor = 1.0
-    params.location_probability_data_scale_factor = 1e-5
-    params.omori_amplitude_scale_factor = 3e-9
-    params.omori_rate_perturbation_scale_factor = 1e-1
-    params.mesh_index = 0
-    params.initial_mesh_slip_deficit_scaling = 0.0
-    params.geometic_moment_rate_scale_factor = 5e1
-    params.plot_events_in_loop = True
-    params.n_events_omori_history_effect = 100
-    params.n_grid_longitude = 500
-    params.n_grid_latitude = 500
-    params.min_longitude = 239.0
-    params.max_longitude = 231.0
-    params.min_latitude = 38.0
-    params.max_latitude = 52.0
-    params.n_contour_levels = 10
-    params.min_contour_value = 0.1  # (m)
-    params.write_event_pickle_files = False
-    params.mesh_parameters_file_name = (
-        "./data/western_north_america_mesh_parameters.json"
-    )
-    params.initial_slip_deficit_rate_file = (
-        "./data/cascadia_low_resolution_tde_dip_slip_rates.npy"
-    )
+    # params = addict.Dict()
+    # params.n_time_steps = 1000
+    # params.time_step = 5e-7
+    # params.b_value = -1.0
+    # params.shear_modulus = 3e10
+    # params.n_samples = 1
+    # params.n_binary = 2
+    # params.minimum_event_moment_magnitude = 5.5
+    # params.maximum_event_moment_magnitude = 9.0
+    # params.time_probability_amplitude_scale_factor = 5e-2
+    # params.time_probability_data_scale_factor = 1e-12
+    # params.area_scaling = 1.25
+    # params.default_omori_decay_time = 100.0
+    # params.minimum_probability = 1e-10
+    # params.time_probability_history_scale_factor = 1e11
+    # params.location_probability_amplitude_scale_factor = 1.0
+    # params.location_probability_data_scale_factor = 1e-5
+    # params.omori_amplitude_scale_factor = 3e-9
+    # params.omori_rate_perturbation_scale_factor = 1e-1
+    # params.mesh_index = 0
+    # params.initial_mesh_slip_deficit_scaling = 0.0
+    # params.geometic_moment_rate_scale_factor = 5e1
+    # params.plot_events_in_loop = True
+    # params.n_events_omori_history_effect = 100
+    # params.n_grid_longitude = 500
+    # params.n_grid_latitude = 500
+    # params.min_longitude = 239.0
+    # params.max_longitude = 231.0
+    # params.min_latitude = 38.0
+    # params.max_latitude = 52.0
+    # params.n_contour_levels = 10
+    # params.min_contour_value = 0.1  # (m)
+    # params.write_event_pickle_files = False
+    # params.mesh_parameters_file_name = (
+    #     "./data/western_north_america_mesh_parameters.json"
+    # )
+    # params.initial_slip_deficit_rate_file = (
+    #     "./data/cascadia_low_resolution_tde_dip_slip_rates.npy"
+    # )
 
     # Save params dictionary to .json file in output_folder
-    with open(params_test.output_folder + "/params.json", "w") as params_output_file:
+    with open(params.output_folder + "/params.json", "w") as params_output_file:
         json.dump(params, params_output_file)
 
     # Time-series storage
@@ -109,11 +109,11 @@ def main(args):
     )
 
     # TODO: Write vtk file with geometry only
-    vtk_file_name = params_test.output_folder + "/" + params_test.run_name + "_mesh_geometry.vtk"
+    vtk_file_name = params.output_folder + "/" + params.run_name + "_mesh_geometry.vtk"
     skies.write_vtk_file(mesh.mesh, np.zeros(mesh.mesh.n_tde), "none", vtk_file_name)
 
     # Open HDF file and create groups for saving data
-    hdf_file_name = params_test.output_folder + "/" + params_test.run_name + ".hdf"
+    hdf_file_name = params.output_folder + "/" + params.run_name + ".hdf"
     hdf_file = h5py.File(hdf_file_name, "w")
     hdf_dataset_cumulative_event_slip = hdf_file.create_dataset(
         "cumulative_slip",
@@ -133,7 +133,7 @@ def main(args):
     # Display information about initial mesh and slip deficit rates
     skies.print_magnitude_overview(mesh.mesh)
     skies.plot_initial_data(
-        mesh.mesh, mesh.mesh_initial_dip_slip_deficit, params_test.output_folder
+        mesh.mesh, mesh.mesh_initial_dip_slip_deficit, params.output_folder
     )
 
     # Main time loop
@@ -268,7 +268,7 @@ def main(args):
 
         # Save event dictionary as pickle file TODO: Move up so that i's nonzero events only
         if params.write_event_pickle_files:
-            event_pickle_file_name = f"{params_test.output_folder}/events/event_{i:010.0f}.pickle"
+            event_pickle_file_name = f"{params.output_folder}/events/event_{i:010.0f}.pickle"
             with open(event_pickle_file_name, "wb") as pickle_file:
                 pickle.dump(event, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -289,7 +289,6 @@ def main(args):
             + mesh.mesh_geometric_moment_scalar_non_zero[i]
         )
 
-    # TODO: Close hdf file
     hdf_file.close()
 
     end_time = datetime.datetime.now()
@@ -299,15 +298,15 @@ def main(args):
     )
 
     # Save time_series dictionary to .pickle file in output_folder
-    with open(params_test.output_folder + "/time_series.pickle", "wb") as pickle_file:
+    with open(params.output_folder + "/time_series.pickle", "wb") as pickle_file:
         pickle.dump(time_series, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
     # Save mesh dictionary to .pickle file in output_folder
-    with open(params_test.output_folder + "/mesh.pickle", "wb") as pickle_file:
+    with open(params.output_folder + "/mesh.pickle", "wb") as pickle_file:
         pickle.dump(mesh, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
     # Save random state to .pickle file in output_folder
-    with open(params_test.output_folder + "/random_state.pickle", "wb") as pickle_file:
+    with open(params.output_folder + "/random_state.pickle", "wb") as pickle_file:
         pickle.dump(
             np.random.get_state(), pickle_file, protocol=pickle.HIGHEST_PROTOCOL
         )
@@ -317,14 +316,14 @@ def main(args):
     end_idx = time_series.time.size
     skies.plot_probability_and_events_time_series(
         params,
-        params_test.output_folder,
+        params.output_folder,
         time_series,
         start_idx,
         end_idx,
     )
 
     # Drop into ipython REPL
-    if bool(1):
+    if bool(params.repl):
         IPython.embed(banner1="")
 
 
