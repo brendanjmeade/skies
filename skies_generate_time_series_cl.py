@@ -1,5 +1,5 @@
 import datetime
-import json
+# import json
 import logging
 import pickle
 
@@ -23,9 +23,6 @@ def main(args):
     time_series = skies.initialize_time_series(params)
     mesh = skies.initialize_mesh(params)
     skies.print_magnitude_overview(mesh.mesh)
-    skies.plot_initial_data(
-        mesh.mesh, mesh.mesh_initial_dip_slip_deficit, params.output_folder
-    )
     hdf_file, hdf_file_datasets = skies.initialize_hdf(params, mesh)
 
     # Main time loop
@@ -189,41 +186,8 @@ def main(args):
     logger.info(
         f"Generated {np.count_nonzero(time_series.event_magnitude)} events in {params.n_time_steps} time steps"
     )
+    skies.save_all(params, mesh, time_series)
 
-    # Save params dictionary to .json file in output_folder
-    with open(params.output_folder + "/params.json", "w") as params_output_file:
-        json.dump(params, params_output_file)
-
-    # Write vtk file with geometry only
-    vtk_file_name = params.output_folder + "/" + params.run_name + "_mesh_geometry.vtk"
-    skies.write_vtk_file(mesh.mesh, np.zeros(mesh.mesh.n_tde), "none", vtk_file_name)
-
-    # Save time_series dictionary to .pickle file in output_folder
-    with open(params.output_folder + "/time_series.pickle", "wb") as pickle_file:
-        pickle.dump(time_series, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
-
-    # Save mesh dictionary to .pickle file in output_folder
-    with open(params.output_folder + "/mesh.pickle", "wb") as pickle_file:
-        pickle.dump(mesh, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
-
-    # Save random state to .pickle file in output_folder
-    with open(params.output_folder + "/random_state.pickle", "wb") as pickle_file:
-        pickle.dump(
-            np.random.get_state(), pickle_file, protocol=pickle.HIGHEST_PROTOCOL
-        )
-
-    # Plot time probability and event moment magnitude time series
-    start_idx = 0
-    end_idx = time_series.time.size
-    skies.plot_probability_and_events_time_series(
-        params,
-        params.output_folder,
-        time_series,
-        start_idx,
-        end_idx,
-    )
-
-    # Drop into ipython REPL
     if bool(params.repl):
         IPython.embed(banner1="")
 

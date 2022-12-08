@@ -3,6 +3,7 @@ import datetime
 import json
 import logging
 import os
+import pickle
 import sys
 import uuid
 import warnings
@@ -1954,3 +1955,45 @@ def initialize_hdf(params, mesh):
         "loading_rate", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
     )
     return hdf_file, hdf_file_datasets
+
+
+def save_all(params, mesh, time_series):
+    """
+    Saving params, mesh, and time series.
+    HDF and event pickle files are saved by separate processes
+    """
+
+    # Save params dictionary to .json file in output_folder
+    with open(params.output_folder + "/params.json", "w") as params_output_file:
+        json.dump(params, params_output_file)
+
+    # Write vtk file with geometry only
+    vtk_file_name = params.output_folder + "/" + params.run_name + "_mesh_geometry.vtk"
+    write_vtk_file(mesh.mesh, np.zeros(mesh.mesh.n_tde), "none", vtk_file_name)
+
+    # Plot initial state and mesh
+    plot_initial_data(
+        mesh.mesh, mesh.mesh_initial_dip_slip_deficit, params.output_folder
+    )
+
+    # Save time_series dictionary to .pickle file in output_folder
+    with open(params.output_folder + "/time_series.pickle", "wb") as pickle_file:
+        pickle.dump(time_series, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
+
+    # Save mesh dictionary to .pickle file in output_folder
+    with open(params.output_folder + "/mesh.pickle", "wb") as pickle_file:
+        pickle.dump(mesh, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
+
+    # Save random state to .pickle file in output_folder
+    with open(params.output_folder + "/random_state.pickle", "wb") as pickle_file:
+        pickle.dump(
+            np.random.get_state(), pickle_file, protocol=pickle.HIGHEST_PROTOCOL
+        )
+
+    # Plot time probability and event moment magnitude time series
+    plot_probability_and_events_time_series(
+        params,
+        params.output_folder,
+        time_series,
+        0, params.n_time_steps,
+    )
