@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import h5py
 import json
 import logging
 import os
@@ -1928,3 +1929,28 @@ def initialize_mesh(params):
         params.geometic_moment_rate_scale_factor * mesh.mesh_initial_dip_slip_deficit
     )
     return mesh
+
+def initialize_hdf(params, mesh):
+    """
+    Open HDF file and create groups for saving data
+    """
+    hdf_file_datasets = addict.Dict()
+    hdf_file_name = params.output_folder + "/" + params.run_name + ".hdf"
+    hdf_file = h5py.File(hdf_file_name, "w")
+    hdf_file_datasets.cumulative_event_slip = hdf_file.create_dataset(
+        "cumulative_slip",
+        shape=(params.n_time_steps, mesh.mesh.n_tde),
+        dtype=float,
+    )
+    hdf_file_datasets.geometric_moment = hdf_file.create_dataset(
+        "geometric_moment",
+        shape=(params.n_time_steps, mesh.mesh.n_tde),
+        dtype=float,
+    )
+    hdf_file_datasets.last_event_slip = hdf_file.create_dataset(
+        "last_event_slip", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
+    )
+    hdf_file_datasets.loading_rate = hdf_file.create_dataset(
+        "loading_rate", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
+    )
+    return hdf_file, hdf_file_datasets
