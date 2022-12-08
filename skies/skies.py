@@ -19,6 +19,7 @@ import numpy as np
 import scipy
 from ismember import ismember
 from rich.logging import RichHandler
+from rich.progress import track
 
 logger = logging.getLogger(__name__)
 
@@ -1674,7 +1675,6 @@ def get_logger(log_level, params):
     logger.addHandler(shell_handler)
     logger.addHandler(file_handler)
     logger.info(f"Output folder: {params.output_folder}")
-    return logger
 
 
 def parse_args():
@@ -1997,3 +1997,168 @@ def save_all(params, mesh, time_series):
         time_series,
         0, params.n_time_steps,
     )
+
+def time_step_loop(params, time_series, mesh):
+    # Main time loop
+    hdf_file, hdf_file_datasets = initialize_hdf(params, mesh)
+    start_time = datetime.datetime.now()
+    for i in track(range(params.n_time_steps - 1), description="Event generation"):
+        # Update mesh_geometric_moment
+        mesh.mesh_geometric_moment += (
+            params.time_step * mesh.mesh_interseismic_loading_rate * mesh.mesh.areas
+        )
+        mesh.mesh_geometric_moment_scalar[i + 1] = np.sum(mesh.mesh_geometric_moment)
+        mesh.mesh_geometric_moment_scalar_non_zero[i + 1] = np.sum(
+            mesh.mesh_geometric_moment[np.where(mesh.mesh_geometric_moment > 0.0)]
+        )
+
+        # Determine whether there is an event at this time step
+        time_series.probability_weight[i] = get_tanh_probability(
+            time_series.probability[i],
+            params.time_probability_amplitude_scale_factor,
+            params.time_probability_data_scale_factor,
+        )
+        time_series.event_trigger_flag[i] = np.random.choice(
+            params.n_binary,
+            params.n_samples,
+            p=[
+                1 - time_series.probability_weight[i],
+                time_series.probability_weight[i],
+            ],
+        )
+
+        if bool(time_series.event_trigger_flag[i]):
+            time_series.last_event_time = i
+            event = addict.Dict()
+            event.shear_modulus = np.array([params.shear_modulus])
+            event.area_scaling = params.area_scaling
+            event.moment_magnitude = get_gutenberg_richter_magnitude(
+                params.b_value,
+                params.minimum_event_moment_magnitude,
+                params.maximum_event_moment_magnitude,
+            )
+            event.moment = moment_magnitude_to_moment(event.moment_magnitude)
+            event.geometric_moment = event.moment / event.shear_modulus
+            time_series.event_magnitude[i] = event.moment_magnitude[0]
+
+            # Find event hypocentral triangle
+            event.location_probability = get_tanh_probability_vector(
+                mesh.mesh_geometric_moment_pre_event,
+                params.location_probability_amplitude_scale_factor,
+                params.location_probability_data_scale_factor,
+            )
+            event.hypocenter_triangle_index = np.random.choice(
+                mesh.mesh.n_tde, params.n_samples, p=event.location_probability
+            )[0]
+
+            # Store coordinates of central mesh element
+            time_series.event_longitude[i] = mesh.mesh.centroids[:, 0][
+                event.hypocenter_triangle_index
+            ]
+            time_series.event_latitude[i] = mesh.mesh.centroids[:, 1][
+                event.hypocenter_triangle_index
+            ]
+            time_series.event_depth[i] = mesh.mesh.centroids[:, 2][
+                event.hypocenter_triangle_index
+            ]
+            time_series.event_x[i] = mesh.mesh.x_centroid[
+                event.hypocenter_triangle_index
+            ]
+            time_series.event_y[i] = mesh.mesh.y_centroid[
+                event.hypocenter_triangle_index
+            ]
+            time_series.event_z[i] = mesh.mesh.z_centroid[
+                event.hypocenter_triangle_index
+            ]
+
+            # Generate coseismic slip area and slip distribution
+            event = get_event_area_slip_triangle_index(mesh.mesh, event)
+            event.mesh_geometric_moment_pre_event = np.copy(
+                mesh.mesh_geometric_moment_pre_event
+            )
+            event.mesh_geometric_moment_post_event = np.copy(
+                mesh.mesh_geometric_moment_pre_event
+                - (event.slip_all_elements * mesh.mesh.areas)
+            )
+
+            # Generate Omori rate decay
+            event.omori_amplitude = (
+                params.omori_amplitude_scale_factor * event.geometric_moment_scalar
+            )
+            event.omori_decay_time = params.default_omori_decay_time
+            omori_rate_perturbation = get_omori_decay_probability(
+                time_series.time,
+                time_series.time[i],
+                event.omori_amplitude,
+                decay_time=event.omori_decay_time,
+            )
+
+            # Coseismic offset to Omori rate effect
+            omori_rate_perturbation[
+                np.where(time_series.time > time_series.time[i])
+            ] -= (event.omori_amplitude * params.omori_rate_perturbation_scale_factor)
+
+            # Store Omori rate decay
+            time_series.cumulate_omori_effect += (
+                params.time_probability_history_scale_factor * omori_rate_perturbation
+            )
+
+            # Update spatially variable mesh parameters
+            mesh.mesh_geometric_moment -= event.slip_all_elements * mesh.mesh.areas
+            mesh.mesh_last_event_slip = event.slip_all_elements
+            mesh.mesh_total_slip += event.slip_all_elements
+            event.mesh_last_event_slip = event.slip_all_elements
+            event.mesh_total_slip = mesh.mesh_total_slip
+
+        else:
+            # Create dummy event dictionary because no event occured
+            event = create_non_event(mesh.mesh.n_tde)
+            event.mesh_geometric_moment_pre_event = np.copy(
+                mesh.mesh_geometric_moment_pre_event
+            )
+            event.mesh_geometric_moment_post_event = (
+                mesh.mesh_geometric_moment_pre_event
+                + (
+                    params.time_step
+                    * mesh.mesh_interseismic_loading_rate
+                    * mesh.mesh.areas
+                )
+            )
+            event.mesh_last_event_slip = mesh.mesh_last_event_slip
+            event.mesh_total_slip = mesh.mesh_total_slip
+
+        # TODO: Check this???
+        event.mesh_initial_dip_slip_deficit = mesh.mesh_initial_dip_slip_deficit
+
+        # Save event dictionary as pickle file TODO: Move up so that i's nonzero events only
+        if params.write_event_pickle_files:
+            event_pickle_file_name = (
+                f"{params.output_folder}/events/event_{i:010.0f}.pickle"
+            )
+            with open(event_pickle_file_name, "wb") as pickle_file:
+                pickle.dump(event, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
+
+        # Save mesh values to HDF file
+        hdf_file_datasets.cumulative_event_slip[i, :] = mesh.mesh_total_slip
+        hdf_file_datasets.last_event_slip[i, :] = mesh.mesh_last_event_slip
+        hdf_file_datasets.geometric_moment[i, :] = mesh.mesh_geometric_moment
+        hdf_file_datasets.loading_rate[i, :] = mesh.mesh_initial_dip_slip_deficit
+
+        # Pre-event moment for next time step
+        mesh.mesh_geometric_moment_pre_event = np.copy(
+            event.mesh_geometric_moment_post_event
+        )
+
+        # Update probability
+        time_series.probability[i + 1] = (
+            time_series.cumulate_omori_effect[i]
+            + mesh.mesh_geometric_moment_scalar_non_zero[i]
+        )
+
+    hdf_file.close()
+    end_time = datetime.datetime.now()
+    logger.info(f"Event sequence generation run time: {(end_time - start_time)}")
+    logger.info(
+        f"Generated {np.count_nonzero(time_series.event_magnitude)} events in {params.n_time_steps} time steps"
+    )
+    # return time_series, mesh
