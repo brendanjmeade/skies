@@ -24,93 +24,12 @@ def main(args):
     skies.create_output_folder(params.base_runs_folder, params.output_folder)
     logger = skies.get_logger(logging.INFO, params)
     skies.process_args(params, args)
-
-    np.random.seed(2)
-
-    # params dictionary with model run parameters
-    # TODO: Read from command line and allow overloading like `celeri`
-    # params = addict.Dict()
-    # params.n_time_steps = 1000
-    # params.time_step = 5e-7
-    # params.b_value = -1.0
-    # params.shear_modulus = 3e10
-    # params.n_samples = 1
-    # params.n_binary = 2
-    # params.minimum_event_moment_magnitude = 5.5
-    # params.maximum_event_moment_magnitude = 9.0
-    # params.time_probability_amplitude_scale_factor = 5e-2
-    # params.time_probability_data_scale_factor = 1e-12
-    # params.area_scaling = 1.25
-    # params.default_omori_decay_time = 100.0
-    # params.minimum_probability = 1e-10
-    # params.time_probability_history_scale_factor = 1e11
-    # params.location_probability_amplitude_scale_factor = 1.0
-    # params.location_probability_data_scale_factor = 1e-5
-    # params.omori_amplitude_scale_factor = 3e-9
-    # params.omori_rate_perturbation_scale_factor = 1e-1
-    # params.mesh_index = 0
-    # params.initial_mesh_slip_deficit_scaling = 0.0
-    # params.geometic_moment_rate_scale_factor = 5e1
-    # params.plot_events_in_loop = True
-    # params.n_events_omori_history_effect = 100
-    # params.n_grid_longitude = 500
-    # params.n_grid_latitude = 500
-    # params.min_longitude = 239.0
-    # params.max_longitude = 231.0
-    # params.min_latitude = 38.0
-    # params.max_latitude = 52.0
-    # params.n_contour_levels = 10
-    # params.min_contour_value = 0.1  # (m)
-    # params.write_event_pickle_files = False
-    # params.mesh_parameters_file_name = (
-    #     "./data/western_north_america_mesh_parameters.json"
-    # )
-    # params.initial_slip_deficit_rate_file = (
-    #     "./data/cascadia_low_resolution_tde_dip_slip_rates.npy"
-    # )
-
-    # Save params dictionary to .json file in output_folder
-    with open(params.output_folder + "/params.json", "w") as params_output_file:
-        json.dump(params, params_output_file)
-
-    # Time-series storage
-    time_series = addict.Dict()
-    time_series.time = np.linspace(0, params.n_time_steps, params.n_time_steps)
-    time_series.probability_weight = np.zeros_like(time_series.time)
-    time_series.probability = np.zeros_like(time_series.time)
-    time_series.event_magnitude = np.zeros_like(time_series.time)
-    time_series.event_trigger_flag = np.zeros_like(time_series.time)
-    time_series.cumulate_omori_effect = np.zeros_like(time_series.time)
-    time_series.event_longitude = np.zeros_like(time_series.time)
-    time_series.event_latitude = np.zeros_like(time_series.time)
-    time_series.event_depth = np.zeros_like(time_series.time)
-    time_series.event_x = np.zeros_like(time_series.time)
-    time_series.event_y = np.zeros_like(time_series.time)
-    time_series.event_z = np.zeros_like(time_series.time)
-    time_series.last_event_time = 0
-
-    # Mesh storage
-    mesh = addict.Dict()
-    meshes = skies.read_meshes(params.mesh_parameters_file_name)
-    mesh.mesh = meshes[params.mesh_index]
-    mesh.mesh_geometric_moment = np.zeros(mesh.mesh.n_tde)
-    mesh.mesh_last_event_slip = np.zeros(mesh.mesh.n_tde)
-    mesh.mesh_total_slip = np.zeros(mesh.mesh.n_tde)
-    mesh.mesh_geometric_moment_pre_event = np.copy(mesh.mesh_geometric_moment)
-    mesh.mesh_geometric_moment_post_event = np.zeros_like(mesh.mesh_geometric_moment)
-    mesh.mesh_geometric_moment_scalar = np.zeros_like(time_series.time)
-    mesh.mesh_geometric_moment_scalar_non_zero = np.zeros_like(time_series.time)
-    mesh.mesh_geometric_moment_scalar[0] = np.sum(mesh.mesh_geometric_moment)
-    # TODO: This should be generalized so that strike- or -dip slip
-    # or both can be specified
-    mesh.mesh_initial_dip_slip_deficit = np.load(params.initial_slip_deficit_rate_file)
-    mesh.mesh_interseismic_loading_rate = (
-        params.geometic_moment_rate_scale_factor * mesh.mesh_initial_dip_slip_deficit
+    time_series = skies.initialize_time_series(params)
+    mesh = skies.initialize_mesh(params)
+    skies.print_magnitude_overview(mesh.mesh)
+    skies.plot_initial_data(
+        mesh.mesh, mesh.mesh_initial_dip_slip_deficit, params.output_folder
     )
-
-    # TODO: Write vtk file with geometry only
-    vtk_file_name = params.output_folder + "/" + params.run_name + "_mesh_geometry.vtk"
-    skies.write_vtk_file(mesh.mesh, np.zeros(mesh.mesh.n_tde), "none", vtk_file_name)
 
     # Open HDF file and create groups for saving data
     hdf_file_name = params.output_folder + "/" + params.run_name + ".hdf"
@@ -130,11 +49,6 @@ def main(args):
         "loading_rate", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
     )
 
-    # Display information about initial mesh and slip deficit rates
-    skies.print_magnitude_overview(mesh.mesh)
-    skies.plot_initial_data(
-        mesh.mesh, mesh.mesh_initial_dip_slip_deficit, params.output_folder
-    )
 
     # Main time loop
     start_time = datetime.datetime.now()
@@ -290,12 +204,19 @@ def main(args):
         )
 
     hdf_file.close()
-
     end_time = datetime.datetime.now()
     logger.info(f"Event sequence generation run time: {(end_time - start_time)}")
     logger.info(
         f"Generated {np.count_nonzero(time_series.event_magnitude)} events in {params.n_time_steps} time steps"
     )
+
+    # Save params dictionary to .json file in output_folder
+    with open(params.output_folder + "/params.json", "w") as params_output_file:
+        json.dump(params, params_output_file)
+
+    # Write vtk file with geometry only
+    vtk_file_name = params.output_folder + "/" + params.run_name + "_mesh_geometry.vtk"
+    skies.write_vtk_file(mesh.mesh, np.zeros(mesh.mesh.n_tde), "none", vtk_file_name)
 
     # Save time_series dictionary to .pickle file in output_folder
     with open(params.output_folder + "/time_series.pickle", "wb") as pickle_file:

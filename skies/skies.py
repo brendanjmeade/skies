@@ -1655,9 +1655,7 @@ def plot_probability_and_events_time_series(
 
 
 def get_logger(log_level, params):
-    params.log_file_name = (
-        params.output_folder + "/" + params.run_name + ".log"
-    )
+    params.log_file_name = params.output_folder + "/" + params.run_name + ".log"
 
     logger = logging.getLogger(__name__)
     while logger.hasHandlers():
@@ -1885,3 +1883,48 @@ def process_args(params, args):
                 logger.warning(f"REPLACED: params.{key}: {params[key]}")
             else:
                 logger.info(f"params.{key}: {params[key]}")
+
+
+def initialize_time_series(params):
+    """
+    Time-series storage
+    """
+    time_series = addict.Dict()
+    time_series.time = np.linspace(0, params.n_time_steps, params.n_time_steps)
+    time_series.probability_weight = np.zeros_like(time_series.time)
+    time_series.probability = np.zeros_like(time_series.time)
+    time_series.event_magnitude = np.zeros_like(time_series.time)
+    time_series.event_trigger_flag = np.zeros_like(time_series.time)
+    time_series.cumulate_omori_effect = np.zeros_like(time_series.time)
+    time_series.event_longitude = np.zeros_like(time_series.time)
+    time_series.event_latitude = np.zeros_like(time_series.time)
+    time_series.event_depth = np.zeros_like(time_series.time)
+    time_series.event_x = np.zeros_like(time_series.time)
+    time_series.event_y = np.zeros_like(time_series.time)
+    time_series.event_z = np.zeros_like(time_series.time)
+    time_series.last_event_time = 0
+    return time_series
+
+
+def initialize_mesh(params):
+    """
+    Mesh storage
+    """
+    mesh = addict.Dict()
+    meshes = read_meshes(params.mesh_parameters_file_name)
+    mesh.mesh = meshes[params.mesh_index]
+    mesh.mesh_geometric_moment = np.zeros(mesh.mesh.n_tde)
+    mesh.mesh_last_event_slip = np.zeros(mesh.mesh.n_tde)
+    mesh.mesh_total_slip = np.zeros(mesh.mesh.n_tde)
+    mesh.mesh_geometric_moment_pre_event = np.copy(mesh.mesh_geometric_moment)
+    mesh.mesh_geometric_moment_post_event = np.zeros_like(mesh.mesh_geometric_moment)
+    mesh.mesh_geometric_moment_scalar = np.zeros(params.n_time_steps)
+    mesh.mesh_geometric_moment_scalar_non_zero = np.zeros(params.n_time_steps)
+    mesh.mesh_geometric_moment_scalar[0] = np.sum(mesh.mesh_geometric_moment)
+    # TODO: This should be generalized so that strike- or -dip slip
+    # or both can be specified
+    mesh.mesh_initial_dip_slip_deficit = np.load(params.initial_slip_deficit_rate_file)
+    mesh.mesh_interseismic_loading_rate = (
+        params.geometic_moment_rate_scale_factor * mesh.mesh_initial_dip_slip_deficit
+    )
+    return mesh
