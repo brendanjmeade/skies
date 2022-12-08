@@ -20,10 +20,6 @@ plt.close("all")
 
 
 def main(args):
-    # command = celeri.get_command(args.command_file_name)
-    # celeri.create_output_folder(command)
-    # celeri.get_logger(command)
-    # celeri.process_args(command, args)
     params_test = skies.get_params(args.params_file_name)
     skies.create_output_folder(params_test.base_runs_folder, params_test.output_folder)
     logger = skies.get_logger(logging.INFO, params_test)
