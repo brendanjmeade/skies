@@ -1,6 +1,5 @@
 import argparse
 import datetime
-import h5py
 import json
 import logging
 import os
@@ -11,6 +10,7 @@ from contextlib import contextmanager
 
 import addict
 import colorcet as cc
+import h5py
 import matplotlib
 import matplotlib.pyplot as plt
 import meshio

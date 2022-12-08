@@ -1,15 +1,12 @@
 import datetime
 import json
 import logging
-import os
 import pickle
 
 import addict
+import IPython
 import matplotlib.pyplot as plt
 import numpy as np
-import IPython
-
-# from rich.logging import RichHandler
 from rich.pretty import pprint
 from rich.progress import track
 
