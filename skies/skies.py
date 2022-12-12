@@ -24,6 +24,7 @@ from rich.progress import track
 logger = logging.getLogger(__name__)
 
 # Constants and parameters
+N_BINARY = 2
 N_GRID_X = 500
 N_GRID_Y = 500
 MAKE_EIGENVECTOR_EXAMPLE_PLOT = False
@@ -1931,6 +1932,7 @@ def initialize_mesh(params):
     )
     return mesh
 
+
 def initialize_hdf(params, mesh):
     """
     Open HDF file and create groups for saving data
@@ -1995,8 +1997,10 @@ def save_all(params, mesh, time_series):
         params,
         params.output_folder,
         time_series,
-        0, params.n_time_steps,
+        0,
+        params.n_time_steps,
     )
+
 
 def time_step_loop(params, time_series, mesh):
     # Main time loop
@@ -2019,8 +2023,8 @@ def time_step_loop(params, time_series, mesh):
             params.time_probability_data_scale_factor,
         )
         time_series.event_trigger_flag[i] = np.random.choice(
-            params.n_binary,
-            params.n_samples,
+            N_BINARY,
+            1,
             p=[
                 1 - time_series.probability_weight[i],
                 time_series.probability_weight[i],
@@ -2048,7 +2052,7 @@ def time_step_loop(params, time_series, mesh):
                 params.location_probability_data_scale_factor,
             )
             event.hypocenter_triangle_index = np.random.choice(
-                mesh.mesh.n_tde, params.n_samples, p=event.location_probability
+                mesh.mesh.n_tde, 1, p=event.location_probability
             )[0]
 
             # Store coordinates of central mesh element
