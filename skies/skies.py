@@ -2114,6 +2114,14 @@ def time_step_loop(params, time_series, mesh):
             event.mesh_last_event_slip = event.slip_all_elements
             event.mesh_total_slip = mesh.mesh_total_slip
 
+            # Save event dictionary as pickle file
+            if params.write_event_pickle_files:
+                event_pickle_file_name = (
+                    f"{params.output_folder}/events/event_{i:010.0f}.pickle"
+                )
+                with open(event_pickle_file_name, "wb") as pickle_file:
+                    pickle.dump(event, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
+
         else:
             # Create dummy event dictionary because no event occured
             event = create_non_event(mesh.mesh.n_tde)
@@ -2133,14 +2141,6 @@ def time_step_loop(params, time_series, mesh):
 
         # TODO: Check this???
         event.mesh_initial_dip_slip_deficit = mesh.mesh_initial_dip_slip_deficit
-
-        # Save event dictionary as pickle file TODO: Move up so that i's nonzero events only
-        if params.write_event_pickle_files:
-            event_pickle_file_name = (
-                f"{params.output_folder}/events/event_{i:010.0f}.pickle"
-            )
-            with open(event_pickle_file_name, "wb") as pickle_file:
-                pickle.dump(event, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
         # Save mesh values to HDF file
         hdf_file_datasets.cumulative_event_slip[i, :] = mesh.mesh_total_slip
