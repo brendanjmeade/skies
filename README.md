@@ -12,8 +12,10 @@ conda activate skies
 pip install --no-use-pep517 -e .
 ```
 
-Then start your favorite notebook viewer (`jupyter lab` or `vscode`) and open and run `NNN.ipynb`.
-
+A model run can be started with something like:
+```
+python ./../skies/skies_generate_sequence.py ./data/mesh_parameters.json --n_time_steps 10000 --repl 1
+```
 
 ### Folder structure and file locations for applications
 We assume that a project is arranged using the following folder structure:
