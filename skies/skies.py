@@ -1829,6 +1829,13 @@ def parse_args():
         help="Omori rate perturbation scale factor",
     )
     parser.add_argument(
+        "--omori_rate_perturbation_exponent",
+        type=float,
+        default=None,
+        required=False,
+        help="Omori rate perturbation exponent",
+    )
+    parser.add_argument(
         "--mesh_index",
         type=int,
         default=None,
@@ -2100,7 +2107,10 @@ def time_step_loop(params, time_series, mesh):
             # Coseismic offset to Omori rate effect
             omori_rate_perturbation[
                 np.where(time_series.time > time_series.time[i])
-            ] -= (event.omori_amplitude * params.omori_rate_perturbation_scale_factor)
+            ] -= (
+                params.omori_rate_perturbation_scale_factor
+                * event.omori_amplitude**params.omori_rate_perturbation_exponent
+            )
 
             # Store Omori rate decay
             time_series.cumulate_omori_effect += (

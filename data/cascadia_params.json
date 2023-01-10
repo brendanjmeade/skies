@@ -26,6 +26,7 @@
     "n_time_steps": 1000000,
     "omori_amplitude_scale_factor": 3e-9,
     "omori_rate_perturbation_scale_factor": 0.1,
+    "omori_rate_perturbation_exponent": 1.0,
     "plot_events_in_loop": true,
     "shear_modulus": 30000000000,
     "time_probability_amplitude_scale_factor": 0.05,
