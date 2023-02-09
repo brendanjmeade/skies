@@ -14,7 +14,7 @@ pip install --no-use-pep517 -e .
 
 A model run can be started with something like:
 ```
-python ./../skies/skies_generate_sequence.py ./data/mesh_parameters.json --n_time_steps 10000 --repl 1
+python ./../skies/skies_generate_sequence.py ./data/cascadia_params.json --n_time_steps 100000 --omori_rate_perturbation_exponent 2.0 --repl 1
 ```
 
 ### Folder structure and file locations for applications
