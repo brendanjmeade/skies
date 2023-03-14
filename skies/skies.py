@@ -37,8 +37,8 @@ KM2_TO_M2 = 1e6  # kilometers squared to meters squared
 KM2M = 1.0e3
 DYNECM_TO_NM = 1e-7  # dynes centimeters to Newton meters
 SHEAR_MODULUS = 3e10  # Shear modulus (Pa)
-MINIMUM_EVENT_MOMENT_MAGNITUDE = 7.0
-MAXIMUM_EVENT_MOMENT_MAGNITUDE = 9.0
+MINIMUM_EVENT_MOMENT_MAGNITUDE = 8.0
+MAXIMUM_EVENT_MOMENT_MAGNITUDE = 8.1
 
 
 def create_output_folder(base_runs_folder, output_path):
@@ -1548,11 +1548,12 @@ def write_vtk_file(mesh, cell_data, cell_data_label, vtk_file_name):
     """
     See: https://github.com/nschloe/meshio
     """
-    points = mesh.meshio_object.points.tolist()
-    cells = [("triangle", mesh.meshio_object.cells[2].data.tolist())]
-    cell_data = {cell_data_label: [cell_data.tolist()]}
-    vtk_mesh = meshio.Mesh(points, cells, cell_data=cell_data)
-    vtk_mesh.write(vtk_file_name, file_format="vtk")
+    pass
+    # points = mesh.meshio_object.points.tolist()
+    # cells = [("triangle", mesh.meshio_object.cells[2].data.tolist())]
+    # cell_data = {cell_data_label: [cell_data.tolist()]}
+    # vtk_mesh = meshio.Mesh(points, cells, cell_data=cell_data)
+    # vtk_mesh.write(vtk_file_name, file_format="vtk")
 
 
 def get_vtk_file_name(run_folder, mesh_parameters_file_name, mesh_index, event_index):
