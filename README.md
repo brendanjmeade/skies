@@ -45,3 +45,7 @@ project_name/
        ├── model_block.csv
        └── model_station.csv
 ```
+
+[![DOI](https://zenodo.org/badge/535758677.svg)](https://zenodo.org/badge/latestdoi/535758677)
+
+
