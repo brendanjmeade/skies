@@ -1,4 +1,5 @@
 # Stochastic Kinematically Informed Earthquake Sequences
+![](https://user-images.githubusercontent.com/4225359/229966215-1c40b94d-2748-441f-9298-74bd48618e50.png)
 
 # Next generation earthquake cycle imaging
 `skies` is a python based package designed to model three-dimensional earthquake sequences in time across geometrically complex fault systems.
