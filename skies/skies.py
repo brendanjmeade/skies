@@ -1958,9 +1958,9 @@ def initialize_hdf(params, mesh):
         shape=(params.n_time_steps, mesh.mesh.n_tde),
         dtype=float,
     )
-    hdf_file_datasets.last_event_slip = hdf_file.create_dataset(
-        "last_event_slip", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
-    )
+    # hdf_file_datasets.last_event_slip = hdf_file.create_dataset(
+    #     "last_event_slip", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
+    # )
     hdf_file_datasets.loading_rate = hdf_file.create_dataset(
         "loading_rate", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
     )
@@ -2155,7 +2155,7 @@ def time_step_loop(params, time_series, mesh):
 
         # Save mesh values to HDF file
         hdf_file_datasets.cumulative_event_slip[i, :] = mesh.mesh_total_slip
-        hdf_file_datasets.last_event_slip[i, :] = mesh.mesh_last_event_slip
+        # hdf_file_datasets.last_event_slip[i, :] = mesh.mesh_last_event_slip
         hdf_file_datasets.geometric_moment[i, :] = mesh.mesh_geometric_moment
         hdf_file_datasets.loading_rate[i, :] = mesh.mesh_initial_dip_slip_deficit
 
