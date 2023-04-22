@@ -35,6 +35,7 @@ AREA_SCALING = (
 RADIUS_EARTH = 6371e3  # (m)
 KM2_TO_M2 = 1e6  # kilometers squared to meters squared
 KM2M = 1.0e3
+M2MM = 1.0e3
 DYNECM_TO_NM = 1e-7  # dynes centimeters to Newton meters
 SHEAR_MODULUS = 3e10  # Shear modulus (Pa)
 MINIMUM_EVENT_MOMENT_MAGNITUDE = 8.0
@@ -1902,6 +1903,12 @@ def initialize_time_series(params):
     """
     time_series = addict.Dict()
     time_series.time = np.linspace(0, params.n_time_steps, params.n_time_steps)
+    time_series.real_time = (
+        time_series.time
+        * params.geometric_moment_rate_sale_factor
+        * params.time_step
+        * M2MM
+    )
     time_series.probability_weight = np.zeros_like(time_series.time)
     time_series.probability = np.zeros_like(time_series.time)
     time_series.event_magnitude = np.zeros_like(time_series.time)
