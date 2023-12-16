@@ -2031,6 +2031,8 @@ def time_step_loop(params, time_series, mesh):
             mesh.mesh_geometric_moment[np.where(mesh.mesh_geometric_moment > 0.0)]
         )
 
+        # TODO: Implement interseismic moment erosion
+
         # Determine whether there is an event at this time step
         time_series.probability_weight[i] = get_tanh_probability(
             time_series.probability[i],
