@@ -28,6 +28,8 @@
     "omori_rate_perturbation_scale_factor": 0.1,
     "omori_rate_perturbation_exponent": 1.0,
     "plot_events_in_loop": true,
+    "geometric_moment_rate_sale_factor": 1.0,
+    "interseismic_moment_erosion": 1,
     "shear_modulus": 30000000000,
     "time_probability_amplitude_scale_factor": 0.05,
     "time_probability_data_scale_factor": 1e-12,
