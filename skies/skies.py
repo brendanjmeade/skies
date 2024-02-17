@@ -2021,7 +2021,12 @@ def time_step_loop(params, time_series, mesh):
     # Main time loop
     hdf_file, hdf_file_datasets = initialize_hdf(params, mesh)
     start_time = datetime.datetime.now()
-    for i in track(range(params.n_time_steps - 1), description="Event generation"):
+    # for i in track(range(params.n_time_steps - 1), description="Event generation"):
+    for i in range(params.n_time_steps - 1):
+        logger.info(
+            f"Time step {i} of {params.n_time_steps - 1}, {(i + 1) / (params.n_time_steps - 1) * 100:5.2f}% complete"
+        )
+
         # Update mesh_geometric_moment
         mesh.mesh_geometric_moment += (
             params.time_step * mesh.mesh_interseismic_loading_rate * mesh.mesh.areas
