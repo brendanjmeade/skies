@@ -1852,11 +1852,11 @@ def parse_args():
         help="initial_mesh_slip_deficit_scaling",
     )
     parser.add_argument(
-        "--geometic_moment_rate_scale_factor",
+        "--geometric_moment_rate_scale_factor",
         type=float,
         default=None,
         required=False,
-        help="geometic_moment_rate_scale_factor",
+        help="geometric_moment_rate_scale_factor",
     )
     args = addict.Dict(vars(parser.parse_args()))
     return args
@@ -1905,7 +1905,7 @@ def initialize_time_series(params):
     time_series.time = np.linspace(0, params.n_time_steps, params.n_time_steps)
     time_series.real_time = (
         time_series.time
-        * params.geometric_moment_rate_sale_factor
+        * params.geometric_moment_rate_scale_factor
         * params.time_step
         * M2MM
     )
@@ -1943,7 +1943,7 @@ def initialize_mesh(params):
     # or both can be specified
     mesh.mesh_initial_dip_slip_deficit = np.load(params.initial_slip_deficit_rate_file)
     mesh.mesh_interseismic_loading_rate = (
-        params.geometic_moment_rate_scale_factor * mesh.mesh_initial_dip_slip_deficit
+        params.geometric_moment_rate_scale_factor * mesh.mesh_initial_dip_slip_deficit
     )
     return mesh
 
