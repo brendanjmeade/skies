@@ -1903,6 +1903,7 @@ def initialize_time_series(params):
     """
     time_series = addict.Dict()
     time_series.time = np.linspace(0, params.n_time_steps, params.n_time_steps)
+    # NOTE: `time_series.real_time`  has units of years
     time_series.real_time = (
         time_series.time
         * params.geometric_moment_rate_scale_factor
@@ -2023,9 +2024,6 @@ def time_step_loop(params, time_series, mesh):
     start_time = datetime.datetime.now()
     # for i in track(range(params.n_time_steps - 1), description="Event generation"):
     for i in range(params.n_time_steps - 1):
-        logger.info(
-            f"Time step {i} of {params.n_time_steps - 1}, {(i + 1) / (params.n_time_steps - 1) * 100:5.2f}% complete"
-        )
 
         # Update mesh_geometric_moment
         mesh.mesh_geometric_moment += (
@@ -2053,7 +2051,13 @@ def time_step_loop(params, time_series, mesh):
             ],
         )
 
+        # TODO: Print event probability information
+        logger.info(
+            f"Time step {i} of {params.n_time_steps - 1}, {(i + 1) / (params.n_time_steps - 1) * 100:5.2f}% complete \n time_series.probability_weight = {time_series.probability_weight[i]:5.3E}"
+        )
+
         if bool(time_series.event_trigger_flag[i]):
+            logger.info("\n\n\n----------> EVENT <----------\n\n\n")
             time_series.last_event_time = i
             event = addict.Dict()
             event.shear_modulus = np.array([params.shear_modulus])
@@ -2119,7 +2123,7 @@ def time_step_loop(params, time_series, mesh):
                 decay_time=event.omori_decay_time,
             )
 
-            # Coseismic offset to Omori rate effect
+            # Coseismic offset due to Omori rate effect
             omori_rate_perturbation[
                 np.where(time_series.time > time_series.time[i])
             ] -= (
