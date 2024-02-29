@@ -2053,7 +2053,7 @@ def time_step_loop(params, time_series, mesh):
 
         # TODO: Print event probability information
         logger.info(
-            f"Time step {i} of {params.n_time_steps - 1}, {(i + 1) / (params.n_time_steps - 1) * 100:5.2f}% complete \n time_series.probability_weight = {time_series.probability_weight[i]:5.3E}"
+            f"Time step {i} of {params.n_time_steps - 1}, {(i + 1) / (params.n_time_steps - 1) * 100:5.2f}% complete \ntime_series.probability_weight = {time_series.probability_weight[i]:5.3E}"
         )
 
         if bool(time_series.event_trigger_flag[i]):
