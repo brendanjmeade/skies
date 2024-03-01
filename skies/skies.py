@@ -12,6 +12,7 @@ from contextlib import contextmanager
 import addict
 import colorcet as cc
 import h5py
+import IPython
 import matplotlib
 import matplotlib.pyplot as plt
 import meshio
@@ -1858,6 +1859,14 @@ def parse_args():
         required=False,
         help="geometric_moment_rate_scale_factor",
     )
+    parser.add_argument(
+        "--geometric_moment_nucleation_probability",
+        type=str,
+        default="high",
+        required=False,
+        help="geometric_moment_nucleation_probability",
+    )
+
     args = addict.Dict(vars(parser.parse_args()))
     return args
 
@@ -2052,12 +2061,12 @@ def time_step_loop(params, time_series, mesh):
         )
 
         # TODO: Print event probability information
-        logger.info(
-            f"Time step {i} of {params.n_time_steps - 1}, {(i + 1) / (params.n_time_steps - 1) * 100:5.2f}% complete \ntime_series.probability_weight = {time_series.probability_weight[i]:5.3E}"
-        )
+        # logger.info(
+        #     f"Time step {i} of {params.n_time_steps - 1}, {(i + 1) / (params.n_time_steps - 1) * 100:5.2f}% complete \ntime_series.probability_weight = {time_series.probability_weight[i]:5.3E}"
+        # )
 
         if bool(time_series.event_trigger_flag[i]):
-            logger.info("\n\n\n----------> EVENT <----------\n\n\n")
+            # logger.info("\n\n\n----------> EVENT <----------\n\n\n")
             time_series.last_event_time = i
             event = addict.Dict()
             event.shear_modulus = np.array([params.shear_modulus])
@@ -2071,12 +2080,28 @@ def time_step_loop(params, time_series, mesh):
             event.geometric_moment = event.moment / event.shear_modulus
             time_series.event_magnitude[i] = event.moment_magnitude[0]
 
-            # Find event hypocentral triangle
-            event.location_probability = get_tanh_probability_vector(
-                mesh.mesh_geometric_moment_pre_event,
-                params.location_probability_amplitude_scale_factor,
-                params.location_probability_data_scale_factor,
+            # Find event initialization triangle
+            mesh_geometric_moment_pre_event_normalized = (
+                mesh.mesh_geometric_moment_pre_event
+                - np.min(mesh.mesh_geometric_moment_pre_event)
             )
+            mesh_geometric_moment_pre_event_normalized = (
+                mesh_geometric_moment_pre_event_normalized
+                / np.max(mesh_geometric_moment_pre_event_normalized)
+            )
+            if params.geometric_moment_nucleation_probability == "high":
+                event.location_probability = get_tanh_probability_vector(
+                    mesh_geometric_moment_pre_event_normalized,
+                    params.location_probability_amplitude_scale_factor,
+                    params.location_probability_data_scale_factor,
+                )
+            elif params.geometric_moment_nucleation_probability == "low":
+                event.location_probability = get_tanh_probability_vector(
+                    1 - mesh_geometric_moment_pre_event_normalized,
+                    params.location_probability_amplitude_scale_factor,
+                    params.location_probability_data_scale_factor,
+                )
+
             event.hypocenter_triangle_index = np.random.choice(
                 mesh.mesh.n_tde, 1, p=event.location_probability
             )[0]
