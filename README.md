@@ -39,12 +39,10 @@ python ./../skies/skies_generate_sequence.py ./data/cascadia_params.json --n_tim
 | `min_longitude` | 239 | Plotting |
 | `minimum_event_moment_magnitude` | 5.0 | Minimum event magnitude (could also be limited by minimum mesh element area) |
 | `minimum_probability` | 1e-10 | Minimum event probability in time |
-| `n_binary` | 2 | WTF |
 | `n_contour_levels` | 10 | Plotting |
 | `n_events_omori_history_effect` | 100 | Number of more recent events that contribute to cumulative Omori effect (UNUSED?) |
 | `n_grid_latitude` | 500 | Plotting |
 | `n_grid_longitude` | 500 | Plotting |
-| `n_samples` | 1 | UNSURE |
 | `n_time_steps` | 1000000 | Number of time steps (not real time) |
 | `omori_amplitude_scale_factor` | 1e-8 | Omori numerator amplitude, $\beta_j$ in the paper |
 | `omori_rate_perturbation_scale_factor` | 1e-1 | Divides Omori time difference, $\tau_j$ in the paper (UNSURE) |
