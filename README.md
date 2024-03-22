@@ -50,15 +50,15 @@ Input parameters:
 | `omori_rate_perturbation_scale_factor` | 1e-1 | |
 | `omori_rate_perturbation_exponent` | 1.0 | |
 | `plot_events_in_loop` | False | |
-| `shear_modulus` | 30000000000 | |
+| `shear_modulus` | 3e10 | |
 | `time_probability_amplitude_scale_factor` | 0.15 | |
 | `time_probability_data_scale_factor` | 1e-12 | |
-| `time_probability_history_scale_factor` | 1000000000000 | |
-| `time_step` | 5e-5 | |
-| `write_event_pickle_files` | 0 | |
-| `repl` | 0 | |
-| `base_runs_folder` | "./runs" | |
-| `geometric_moment_nucleation_probability` | "low" | |
+| `time_probability_history_scale_factor` | 1e12 | |
+| `time_step` | 5e-5 | Time step duration (not real time)|
+| `write_event_pickle_files` | 0 | Write a pickle file for each earthquake|
+| `repl` | 0 | Drop into iPython REPL at end of run|
+| `base_runs_folder` | "./runs" | Base output folder |
+| `geometric_moment_nucleation_probability` | "low" | Should earthquake nucleate in regions of "high" or "low" geometric moment (NEED TO REVISE) |
 
 
 ### Folder structure and file locations for applications
