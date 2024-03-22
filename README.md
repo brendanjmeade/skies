@@ -61,11 +61,13 @@ Input parameters:
 | `geometric_moment_nucleation_probability` | "low" | Should earthquake nucleate in regions of "high" or "low" geometric moment (NEED TO REVISE) |
 
 - Time probability equation:
+
 $$
 p^t = \gamma_a^t \tanh \left( \gamma_d^t \left[r^\mathrm{a} + \sum\nolimits_j^{n(t_j \leq t)} \{ r^\mathrm{o} + r^\mathrm{r} \} + \mathcal{A} \right] \right).
 $$
 
 - Omori time decay equation
+
 $$
 r^\mathrm{o}_j(t) = \frac{\beta_j}{[1 + \frac{(t - t_j)^{p_j}}{\tau_j}]}
 $$
