@@ -60,6 +60,9 @@ Input parameters:
 | `base_runs_folder` | "./runs" | Base output folder |
 | `geometric_moment_nucleation_probability` | "low" | Should earthquake nucleate in regions of "high" or "low" geometric moment (NEED TO REVISE) |
 
+$$
+r^\mathrm{o}_j(t) = \beta_j / [1 + (t - t_j)^{p_j} / \tau_j]
+$$
 
 ### Folder structure and file locations for applications
 We assume that a project is arranged using the following folder structure:
