@@ -61,27 +61,34 @@ Input parameters:
 | `geometric_moment_nucleation_probability` | "low" | Should earthquake nucleate in regions of "high" or "low" geometric moment (NEED TO REVISE) |
 
 - Time probability equation:
+     - $\gamma_a^t$: `NNN`
+     - $\gamma_d^t$: `NNN`
 
 $$
 p^t = \gamma_a^t \tanh \left( \gamma_d^t \left[r^\mathrm{a} + \sum\nolimits_j^{n(t_j \leq t)} \{ r^\mathrm{o} + r^\mathrm{r} \} + \mathcal{A} \right] \right).
 $$
 
 - Location probability equation:
+     - $\gamma_a^h$: `NNN`
+     - $\gamma_d^h$: `NNN`
 
 $$
 p_i^h(t_k) = \gamma_a^h \tanh ( \gamma_d^h \left[m^\mathrm{a}_i - m^\mathrm{r}_i\right] )
 $$
 
 - Omori time decay equation:
-
+     - $\beta$: `NNN`
+     - $p$: `NNN`
+     - $\tau$: `NNN`
+  
 $$
 r^\mathrm{o}_j(t) = \frac{\beta_j}{1 + \frac{(t - t_j)^{p_j}}{\tau_j}}
 $$
 
 - Moment reduction following slip events
-     - $\omega'$
-     - $\beta'$
-     - $\psi'$
+     - $\omega'$: `NNN`
+     - $\beta'$: `NNN`
+     - $\psi'$: `NNN`
 
 $$
 r^\mathrm{r} = -\omega' \beta' \left[ \sum\nolimits_i m_i(t_j) \right] ^{\psi'}
