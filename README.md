@@ -33,7 +33,7 @@ Input parameters:
 | `max_longitude` | 231 | Plotting |
 | `maximum_event_moment_magnitude` | 9.5 | Maximum event magnitude (could also be limited by total mesh area) |
 | `mesh_index` | 0 | If the `mesh_parameters_file_name` file points to more than one mesh select the one specified by the index here |
-| `mesh_parameters_file_name` | "mesh_parameters.json" | |
+| `mesh_parameters_file_name` | "mesh_parameters.json" | `celeri` style mesh parameters file |
 | `min_contour_value` | 0.1 | Plotting |
 | `min_latitude` | 38 | Plotting |
 | `min_longitude` | 239 | Plotting |
