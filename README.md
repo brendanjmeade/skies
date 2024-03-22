@@ -29,19 +29,19 @@ Input parameters:
 | `initial_slip_deficit_rate_file` | "rates.npy" | Geometric moment accumulation rates on a single mesh.  This is just a single numpy array with one geometric moment rate component, generally dip-slip or strike-slip |
 | `location_probability_amplitude_scale_factor` | 1 | |
 | `location_probability_data_scale_factor` | 0.00001 | |
-| `max_latitude` | 52 | |
-| `max_longitude` | 231 | |
-| `maximum_event_moment_magnitude` | 9.5 | |
-| `mesh_index` | 0 | |
+| `max_latitude` | 52 | Plotting |
+| `max_longitude` | 231 | Plotting |
+| `maximum_event_moment_magnitude` | 9.5 | Maximum event magnitude (could also be limited by total mesh area) |
+| `mesh_index` | 0 | If the `mesh_parameters_file_name` file points to more than one mesh select the one specified by the index here |
 | `mesh_parameters_file_name` | "mesh_parameters.json" | |
-| `min_contour_value` | 0.1 | |
-| `min_latitude` | 38 | |
-| `min_longitude` | 239 | |
-| `minimum_event_moment_magnitude` | 5.0 | |
+| `min_contour_value` | 0.1 | Plotting |
+| `min_latitude` | 38 | Plotting |
+| `min_longitude` | 239 | Plotting |
+| `minimum_event_moment_magnitude` | 5.0 | Minimum event magnitude (could also be limited by minimum mesh element area) |
 | `minimum_probability` | 1e-10 | |
 | `n_binary` | 2 | WTF |
 | `n_contour_levels` | 10 | Plotting |
-| `n_events_omori_history_effect` | 100 | |
+| `n_events_omori_history_effect` | 100 | Number of more recent events that contribute to cumulative Omori effect (UNUSED?) |
 | `n_grid_latitude` | 500 | Plotting |
 | `n_grid_longitude` | 500 | Plotting |
 | `n_samples` | 1 | UNSURE |
@@ -49,14 +49,14 @@ Input parameters:
 | `omori_amplitude_scale_factor` | 1e-8 | |
 | `omori_rate_perturbation_scale_factor` | 1e-1 | |
 | `omori_rate_perturbation_exponent` | 1.0 | |
-| `plot_events_in_loop` | False | |
-| `shear_modulus` | 3e10 | |
+| `plot_events_in_loop` | False | Plotting |
+| `shear_modulus` | 3e10 | Shear modulus |
 | `time_probability_amplitude_scale_factor` | 0.15 | |
 | `time_probability_data_scale_factor` | 1e-12 | |
 | `time_probability_history_scale_factor` | 1e12 | |
 | `time_step` | 5e-5 | Time step duration (not real time)|
 | `write_event_pickle_files` | 0 | Write a pickle file for each earthquake|
-| `repl` | 0 | Drop into iPython REPL at end of run|
+| `repl` | 0 | Drop into iPython REPL at end of run |
 | `base_runs_folder` | "./runs" | Base output folder |
 | `geometric_moment_nucleation_probability` | "low" | Should earthquake nucleate in regions of "high" or "low" geometric moment (NEED TO REVISE) |
 
