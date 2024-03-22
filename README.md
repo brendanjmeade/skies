@@ -47,8 +47,8 @@ python ./../skies/skies_generate_sequence.py ./data/cascadia_params.json --n_tim
 | `n_samples` | 1 | UNSURE |
 | `n_time_steps` | 1000000 | Number of time steps (not real time) |
 | `omori_amplitude_scale_factor` | 1e-8 | Omori numerator amplitude, $\beta_j$ in the paper |
-| `omori_rate_perturbation_scale_factor` | 1e-1 | Divides Omori time difference, $\tau_j$ in the paper |
-| `omori_rate_perturbation_exponent` | 1.0 | Omori time difference exponent, $p_j$ in the paper  |
+| `omori_rate_perturbation_scale_factor` | 1e-1 | Divides Omori time difference, $\tau_j$ in the paper (UNSURE) |
+| `omori_rate_perturbation_exponent` | 1.0 | Omori time difference exponent, $p_j$ in the paper |
 | `plot_events_in_loop` | False | Plotting |
 | `shear_modulus` | 3e10 | Shear modulus |
 | `time_probability_amplitude_scale_factor` | 0.15 | Time probability amplitude scale factor (leading coefficient in front of $\tanh$ for time probability), $\gamma^t_a$ in the paper |
@@ -78,9 +78,9 @@ p_i^h(t_k) = \gamma_a^h \tanh ( \gamma_d^h \left[m^\mathrm{a}_i - m^\mathrm{r}_i
 $$
 
 - Omori time decay equation:
-     - $\beta$: `NNN`
-     - $p$: `NNN`
-     - $\tau$: `NNN`
+     - $\beta$: `omori_amplitude_scale_factor`
+     - $p$: `omori_rate_perturbation_exponent`
+     - $\tau$: `omori_rate_perturbation_scale_factor`
   
 $$
 r^\mathrm{o}_j(t) = \frac{\beta_j}{1 + \frac{(t - t_j)^{p_j}}{\tau_j}}
