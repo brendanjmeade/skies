@@ -79,14 +79,14 @@ r^\mathrm{o}_j(t) = \frac{\beta_j}{1 + \frac{(t - t_j)^{p_j}}{\tau_j}}
 $$
 
 - Moment reduction following slip events
+     - $\omega'$
+     - $\beta'$
+     - $\psi'$
 
 $$
 r^\mathrm{r} = -\omega' \beta' \left[ \sum\nolimits_i m_i(t_j) \right] ^{\psi'}
 $$
 
-     - $\omega'$
-     - $\beta'$
-     - $\psi'$
 
 ### Folder structure and file locations for applications
 We assume that a project is arranged using the following folder structure:
