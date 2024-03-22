@@ -79,7 +79,7 @@ $$
 
 - Omori time decay equation:
      - $\beta$: `omori_amplitude_scale_factor`
-     - $p$: `omori_rate_perturbation_exponent`
+     - $p$: Currently set to 1
      - $\tau$: `omori_rate_perturbation_scale_factor`
   
 $$
@@ -87,8 +87,8 @@ r^\mathrm{o}_j(t) = \frac{\beta_j}{1 + \frac{(t - t_j)^{p_j}}{\tau_j}}
 $$
 
 - Moment reduction following slip events
-     - $\omega'$: `omori_amplitude_scale_factor` (UNSURE)
-     - $\beta'$: `NNN`
+     - $\omega'$: IS THIS EVEN DEFINED??? (UNSURE)
+     - $\beta'$: `omori_amplitude_scale_factor`
      - $\psi'$: `omori_rate_perturbation_exponent`
 
 $$
