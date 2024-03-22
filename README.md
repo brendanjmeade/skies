@@ -66,10 +66,16 @@ $$
 p^t = \gamma_a^t \tanh \left( \gamma_d^t \left[r^\mathrm{a} + \sum\nolimits_j^{n(t_j \leq t)} \{ r^\mathrm{o} + r^\mathrm{r} \} + \mathcal{A} \right] \right).
 $$
 
-- Omori time decay equation
+- Location probability equation:
 
 $$
-r^\mathrm{o}_j(t) = \frac{\beta_j}{[1 + \frac{(t - t_j)^{p_j}}{\tau_j}]}
+p_i^h(t_k) = \gamma_a^h \tanh ( \gamma_d^h \left[m^\mathrm{a}_i - m^\mathrm{r}_i\right] )
+$$
+
+- Omori time decay equation:
+
+$$
+r^\mathrm{o}_j(t) = \frac{\beta_j}{1 + \frac{(t - t_j)^{p_j}}{\tau_j}}
 $$
 
 ### Folder structure and file locations for applications
