@@ -19,7 +19,7 @@ python ./../skies/skies_generate_sequence.py ./data/cascadia_params.json --n_tim
 ```
 
 Input parameters:
-| parameter name | example value | use |
+| parameter name | example value | description |
 | --- | --- | --- |
 | `area_scaling` | 1.25 | Factor that expands rupture area from empirical rupture area |
 | `b_value` | -1 | Gutenberg-Ricter $b$-value |
@@ -46,14 +46,14 @@ Input parameters:
 | `n_grid_longitude` | 500 | Plotting |
 | `n_samples` | 1 | UNSURE |
 | `n_time_steps` | 1000000 | Number of time steps (not real time) |
-| `omori_amplitude_scale_factor` | 1e-8 | |
-| `omori_rate_perturbation_scale_factor` | 1e-1 | |
-| `omori_rate_perturbation_exponent` | 1.0 | |
+| `omori_amplitude_scale_factor` | 1e-8 | Omori numerator amplitude, $\beta_j$ in the paper |
+| `omori_rate_perturbation_scale_factor` | 1e-1 | Divides Omori time difference, $\tau_j$ in the paper |
+| `omori_rate_perturbation_exponent` | 1.0 | Omori time difference exponent, $p_j$ in the paper  |
 | `plot_events_in_loop` | False | Plotting |
 | `shear_modulus` | 3e10 | Shear modulus |
-| `time_probability_amplitude_scale_factor` | 0.15 | Time probability amplitude scale factor (leading coefficient in front of $\tanh$ for time probability), $\gamma^t_a$ is the paper |
-| `time_probability_data_scale_factor` | 1e-12 | Time probability amplitude scale factor (coefficient that multiplies arguments to $\tanh$ for time probability), $\gamma^t_d$ is the paper |
-| `time_probability_history_scale_factor` | 1e12 | |
+| `time_probability_amplitude_scale_factor` | 0.15 | Time probability amplitude scale factor (leading coefficient in front of $\tanh$ for time probability), $\gamma^t_a$ in the paper |
+| `time_probability_data_scale_factor` | 1e-12 | Time probability amplitude scale factor (coefficient that multiplies arguments to $\tanh$ for time probability), $\gamma^t_d$ in the paper |
+| `time_probability_history_scale_factor` | 1e12 | UNSURE |
 | `time_step` | 5e-5 | Time step duration (not real time)|
 | `write_event_pickle_files` | 0 | Write a pickle file for each earthquake|
 | `repl` | 0 | Drop into iPython REPL at end of run |
