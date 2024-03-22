@@ -80,7 +80,7 @@ $$
 - Omori time decay equation:
      - $\beta$: `omori_amplitude_scale_factor`
      - $p$: Currently set to 1
-     - $\tau$: `omori_rate_perturbation_scale_factor`
+     - $\tau$: `default_omori_decay_time`
   
 $$
 r^\mathrm{o}_j(t) = \frac{\beta_j}{1 + \frac{(t - t_j)^{p_j}}{\tau_j}}
