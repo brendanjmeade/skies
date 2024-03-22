@@ -2,7 +2,7 @@
 ![](https://user-images.githubusercontent.com/4225359/229966215-1c40b94d-2748-441f-9298-74bd48618e50.png)
 
 # Kinematic / statistical earthquake sequence generation
-`skies` is a python-based package designed to model three-dimensional earthquake sequences in time across geometrically complex fault systems.
+`skies` is a python-based package designed to model three-dimensional earthquake sequences in time across geometrically complex fault systems.  It's the code advertised by the paper, ["Meade, B. J., (2024) A kinematic method for generating earthquake sequences, Computers and Geosciences"](https://www.sciencedirect.com/science/article/abs/pii/S0098300423002212)
 
 # Getting started
 To set up a development conda environment, run the following commands in the `skies` folder.
@@ -27,8 +27,8 @@ Input parameters:
 | `geometric_moment_rate_scale_factor` | 1 | Scales rates of moment accumulation.  Should always be 1 except for debugging |
 | `initial_mesh_slip_deficit_scaling` | 0 | UNSURE |
 | `initial_slip_deficit_rate_file` | "rates.npy" | Geometric moment accumulation rates on a single mesh.  This is just a single numpy array with one geometric moment rate component, generally dip-slip or strike-slip |
-| `location_probability_amplitude_scale_factor` | 1 | Location probability amplitude scale factor (leading coefficient in front of $\tanh$ for location probability) |
-| `location_probability_data_scale_factor` | 0.00001 | Location probability amplitude scale factor (coefficient that multiplies arguments to $\tanh$ for location probability) |
+| `location_probability_amplitude_scale_factor` | 1 | Location probability amplitude scale factor (leading coefficient in front of $\tanh$ for location probability, $\gamma^h_a$ in the paper) |
+| `location_probability_data_scale_factor` | 0.00001 | Location probability amplitude scale factor (coefficient that multiplies arguments to $\tanh$ for location probability, $\gamma^h_d$ in the paper) |
 | `max_latitude` | 52 | Plotting |
 | `max_longitude` | 231 | Plotting |
 | `maximum_event_moment_magnitude` | 9.5 | Maximum event magnitude (could also be limited by total mesh area) |
