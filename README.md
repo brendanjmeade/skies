@@ -87,9 +87,9 @@ r^\mathrm{o}_j(t) = \frac{\beta_j}{1 + \frac{(t - t_j)^{p_j}}{\tau_j}}
 $$
 
 - Moment reduction following slip events
-     - $\omega'$: `NNN`
+     - $\omega'$: `omori_amplitude_scale_factor` (UNSURE)
      - $\beta'$: `NNN`
-     - $\psi'$: `NNN`
+     - $\psi'$: `omori_rate_perturbation_exponent`
 
 $$
 r^\mathrm{r} = -\omega' \beta' \left[ \sum\nolimits_i m_i(t_j) \right] ^{\psi'}
