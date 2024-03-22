@@ -21,12 +21,12 @@ python ./../skies/skies_generate_sequence.py ./data/cascadia_params.json --n_tim
 Input parameters:
 | parameter name | example value | use |
 | --- | --- | --- |
-| `area_scaling` | 1.25 | |
-| `b_value` | -1 | |
-| `default_omori_decay_time` | 10 | |
-| `geometric_moment_rate_scale_factor` | 5 | |
-| `initial_mesh_slip_deficit_scaling` | 0 | |
-| `initial_slip_deficit_rate_file` | "rates.npy" | |
+| `area_scaling` | 1.25 | Factor that expands rupture area from empirical rupture area |
+| `b_value` | -1 | Gutenberg-Ricter $b$-value |
+| `default_omori_decay_time` | 10 | Controls length of Omori decay following earthquakes (**smaller is longer** Omori decay time) |
+| `geometric_moment_rate_scale_factor` | 1 | Scales rates of moment accumulation.  Should always be 1 except for debugging |
+| `initial_mesh_slip_deficit_scaling` | 0 | UNSURE |
+| `initial_slip_deficit_rate_file` | "rates.npy" | Geometric moment accumulation rates on a single mesh.  This is just a single numpy array with one geometric moment rate component, generally dip-slip or strike-slip |
 | `location_probability_amplitude_scale_factor` | 1 | |
 | `location_probability_data_scale_factor` | 0.00001 | |
 | `max_latitude` | 52 | |
@@ -39,13 +39,13 @@ Input parameters:
 | `min_longitude` | 239 | |
 | `minimum_event_moment_magnitude` | 5.0 | |
 | `minimum_probability` | 1e-10 | |
-| `n_binary` | 2 | |
-| `n_contour_levels` | 10 | |
+| `n_binary` | 2 | WTF |
+| `n_contour_levels` | 10 | Plotting |
 | `n_events_omori_history_effect` | 100 | |
-| `n_grid_latitude` | 500 | |
-| `n_grid_longitude` | 500 | |
-| `n_samples` | 1 | |
-| `n_time_steps` | 1000000 | |
+| `n_grid_latitude` | 500 | Plotting |
+| `n_grid_longitude` | 500 | Plotting |
+| `n_samples` | 1 | UNSURE |
+| `n_time_steps` | 1000000 | Number of time steps (not real time) |
 | `omori_amplitude_scale_factor` | 1e-8 | |
 | `omori_rate_perturbation_scale_factor` | 1e-1 | |
 | `omori_rate_perturbation_exponent` | 1.0 | |
