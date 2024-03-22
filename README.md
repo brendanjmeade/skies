@@ -84,7 +84,9 @@ $$
 r^\mathrm{r} = -\omega' \beta' \left[ \sum\nolimits_i m_i(t_j) \right] ^{\psi'}
 $$
 
-- where $\omega'$,  $\beta'$, and $\psi'$ are constants.
+     - $\omega'$
+     - $\beta'$
+     - $\psi'$
 
 ### Folder structure and file locations for applications
 We assume that a project is arranged using the following folder structure:
