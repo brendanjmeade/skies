@@ -27,8 +27,8 @@ Input parameters:
 | `geometric_moment_rate_scale_factor` | 1 | Scales rates of moment accumulation.  Should always be 1 except for debugging |
 | `initial_mesh_slip_deficit_scaling` | 0 | UNSURE |
 | `initial_slip_deficit_rate_file` | "rates.npy" | Geometric moment accumulation rates on a single mesh.  This is just a single numpy array with one geometric moment rate component, generally dip-slip or strike-slip |
-| `location_probability_amplitude_scale_factor` | 1 | |
-| `location_probability_data_scale_factor` | 0.00001 | |
+| `location_probability_amplitude_scale_factor` | 1 | Location probability amplitude scale factor (leading coefficient in front of $\tanh$ for location probability) |
+| `location_probability_data_scale_factor` | 0.00001 | Location probability amplitude scale factor (coefficient that multiplies arguments to $\tanh$ for location probability) |
 | `max_latitude` | 52 | Plotting |
 | `max_longitude` | 231 | Plotting |
 | `maximum_event_moment_magnitude` | 9.5 | Maximum event magnitude (could also be limited by total mesh area) |
@@ -38,7 +38,7 @@ Input parameters:
 | `min_latitude` | 38 | Plotting |
 | `min_longitude` | 239 | Plotting |
 | `minimum_event_moment_magnitude` | 5.0 | Minimum event magnitude (could also be limited by minimum mesh element area) |
-| `minimum_probability` | 1e-10 | |
+| `minimum_probability` | 1e-10 | Minimum event probability in time |
 | `n_binary` | 2 | WTF |
 | `n_contour_levels` | 10 | Plotting |
 | `n_events_omori_history_effect` | 100 | Number of more recent events that contribute to cumulative Omori effect (UNUSED?) |
@@ -51,8 +51,8 @@ Input parameters:
 | `omori_rate_perturbation_exponent` | 1.0 | |
 | `plot_events_in_loop` | False | Plotting |
 | `shear_modulus` | 3e10 | Shear modulus |
-| `time_probability_amplitude_scale_factor` | 0.15 | |
-| `time_probability_data_scale_factor` | 1e-12 | |
+| `time_probability_amplitude_scale_factor` | 0.15 | Time probability amplitude scale factor (leading coefficient in front of $\tanh$ for time probability) |
+| `time_probability_data_scale_factor` | 1e-12 | Time probability amplitude scale factor (coefficient that multiplies arguments to $\tanh$ for time probability) |
 | `time_probability_history_scale_factor` | 1e12 | |
 | `time_step` | 5e-5 | Time step duration (not real time)|
 | `write_event_pickle_files` | 0 | Write a pickle file for each earthquake|
