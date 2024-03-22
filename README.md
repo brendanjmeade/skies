@@ -18,7 +18,7 @@ A model run can be started with something like:
 python ./../skies/skies_generate_sequence.py ./data/cascadia_params.json --n_time_steps 100000 --omori_rate_perturbation_exponent 2.0 --repl 1
 ```
 
-Input parameters:
+# Input parameters:
 | parameter name | example value | description |
 | --- | --- | --- |
 | `area_scaling` | 1.25 | Factor that expands rupture area from empirical rupture area |
@@ -60,17 +60,18 @@ Input parameters:
 | `base_runs_folder` | "./runs" | Base output folder |
 | `geometric_moment_nucleation_probability` | "low" | Should earthquake nucleate in regions of "high" or "low" geometric moment (NEED TO REVISE) |
 
+# Parameters that most directly control model
 - Time probability equation:
-     - $\gamma_a^t$: `NNN`
-     - $\gamma_d^t$: `NNN`
+     - $\gamma_a^t$: `time_probability_amplitude_scale_factor`
+     - $\gamma_d^t$: `time_probability_data_scale_factor`
 
 $$
 p^t = \gamma_a^t \tanh \left( \gamma_d^t \left[r^\mathrm{a} + \sum\nolimits_j^{n(t_j \leq t)} \{ r^\mathrm{o} + r^\mathrm{r} \} + \mathcal{A} \right] \right).
 $$
 
 - Location probability equation:
-     - $\gamma_a^h$: `NNN`
-     - $\gamma_d^h$: `NNN`
+     - $\gamma_a^h$: `location_probability_amplitude_scale_factor`
+     - $\gamma_d^h$: `location_probability_data_scale_factor`
 
 $$
 p_i^h(t_k) = \gamma_a^h \tanh ( \gamma_d^h \left[m^\mathrm{a}_i - m^\mathrm{r}_i\right] )
