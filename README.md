@@ -95,6 +95,29 @@ $$
 r^\mathrm{r} = -\omega' \beta' \left[ \sum\nolimits_i m_i(t_j) \right] ^{\psi'}
 $$
 
+Note: Something is messed up with the definitions above and below.
+
+```python
+            # Generate Omori rate decay
+            event.omori_amplitude = (
+                params.omori_amplitude_scale_factor * event.geometric_moment_scalar
+            )
+            event.omori_decay_time = params.default_omori_decay_time
+            omori_rate_perturbation = get_omori_decay_probability(
+                time_series.time,
+                time_series.time[i],
+                event.omori_amplitude,
+                decay_time=event.omori_decay_time,
+            )
+
+            # Coseismic offset due to Omori rate effect
+            omori_rate_perturbation[
+                np.where(time_series.time > time_series.time[i])
+            ] -= (
+                params.omori_rate_perturbation_scale_factor
+                * event.omori_amplitude**params.omori_rate_perturbation_exponent
+            )
+```
 
 ### Folder structure and file locations for applications
 We assume that a project is arranged using the following folder structure:
