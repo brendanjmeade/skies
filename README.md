@@ -61,7 +61,7 @@ Input parameters:
 | `geometric_moment_nucleation_probability` | "low" | Should earthquake nucleate in regions of "high" or "low" geometric moment (NEED TO REVISE) |
 
 $$
-r^\mathrm{o}_j(t) = \beta_j / [1 + (t - t_j)^{p_j} / \tau_j]
+r^\mathrm{o}_j(t) = \frac{\beta_j}{[1 + (t - t_j)^{p_j} / \tau_j]}
 $$
 
 ### Folder structure and file locations for applications
