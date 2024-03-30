@@ -1969,28 +1969,25 @@ def initialize_hdf(params, mesh):
         "cumulative_slip",
         shape=(params.n_time_steps, mesh.mesh.n_tde),
         dtype=float,
-        compression="gzip",
+        # compression="gzip",
     )
     hdf_file_datasets.geometric_moment = hdf_file.create_dataset(
         "geometric_moment",
         shape=(params.n_time_steps, mesh.mesh.n_tde),
         dtype=float,
-        compression="gzip",
+        # compression="gzip",
     )
-    # hdf_file_datasets.last_event_slip = hdf_file.create_dataset(
-    #     "last_event_slip", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
-    # )
     hdf_file_datasets.loading_rate = hdf_file.create_dataset(
         "loading_rate",
         shape=(mesh.mesh.n_tde),
         dtype=float,
-        compression="gzip",
+        # compression="gzip",
     )
-    hdf_file_datasets.loading_rate = hdf_file.create_dataset(
+    hdf_file_datasets.location_probability = hdf_file.create_dataset(
         "location_probability",
         shape=(params.n_time_steps, mesh.mesh.n_tde),
         dtype=float,
-        compression="gzip",
+        # compression="gzip",
     )
     return hdf_file, hdf_file_datasets
 
@@ -2042,8 +2039,8 @@ def time_step_loop(params, time_series, mesh):
     # Main time loop
     hdf_file, hdf_file_datasets = initialize_hdf(params, mesh)
     start_time = datetime.datetime.now()
-    # for i in track(range(params.n_time_steps - 1), description="Event generation"):
-    for i in range(params.n_time_steps - 1):
+    for i in track(range(params.n_time_steps - 1), description="Event generation"):
+    # for i in range(params.n_time_steps - 1):
 
         # Update mesh_geometric_moment
         mesh.mesh_geometric_moment += (
@@ -2215,8 +2212,7 @@ def time_step_loop(params, time_series, mesh):
         hdf_file_datasets.cumulative_event_slip[i, :] = mesh.mesh_total_slip
         hdf_file_datasets.geometric_moment[i, :] = mesh.mesh_geometric_moment
         hdf_file_datasets.location_probability[i, :] = event.location_probability
-        
-        # hdf_file_datasets.loading_rate[i, :] = mesh.mesh_initial_dip_slip_deficit
+                # hdf_file_datasets.loading_rate[i, :] = mesh.mesh_initial_dip_slip_deficit
 
         # Pre-event moment for next time step
         mesh.mesh_geometric_moment_pre_event = np.copy(
