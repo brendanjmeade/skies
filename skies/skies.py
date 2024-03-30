@@ -1988,7 +1988,7 @@ def initialize_hdf(params, mesh):
     )
     hdf_file_datasets.loading_rate = hdf_file.create_dataset(
         "location_probability",
-        shape=(params.n_time_steps, mesh.mesh.n_tde),,
+        shape=(params.n_time_steps, mesh.mesh.n_tde),
         dtype=float,
         compression="gzip",
     )

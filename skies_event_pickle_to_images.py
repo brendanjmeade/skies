@@ -76,7 +76,7 @@ if len(event_indices) > 0:
 plt.figure()
 plt.plot(time_series_moment_magnitude, "rx")
 plt.show(block=False)
-sys.exit()
+# sys.exit()
 
 # Plot a single event
 event_file_index = 0
