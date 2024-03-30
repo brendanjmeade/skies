@@ -1525,7 +1525,7 @@ def create_non_event(n_tde):
     event.moment_magnitude = np.array([0.0])
     event.moment = 0.0
     event.geometric_moment = 0.0
-    event.location_probability = 0.0
+    # event.location_probability = 0.0
     event.hypocenter_triangle_index = np.nan
     event.target_area = 0.0
     event.hypocenter_triangle_area = 0.0
@@ -2211,6 +2211,7 @@ def time_step_loop(params, time_series, mesh):
         else:
             # Create dummy event dictionary because no event occured
             event = create_non_event(mesh.mesh.n_tde)
+            event.location_probability = location_probability
             event.mesh_geometric_moment_pre_event = np.copy(
                 mesh.mesh_geometric_moment_pre_event
             )
