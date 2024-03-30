@@ -1969,17 +1969,28 @@ def initialize_hdf(params, mesh):
         "cumulative_slip",
         shape=(params.n_time_steps, mesh.mesh.n_tde),
         dtype=float,
+        compression="gzip",
     )
     hdf_file_datasets.geometric_moment = hdf_file.create_dataset(
         "geometric_moment",
         shape=(params.n_time_steps, mesh.mesh.n_tde),
         dtype=float,
+        compression="gzip",
     )
     # hdf_file_datasets.last_event_slip = hdf_file.create_dataset(
     #     "last_event_slip", shape=(params.n_time_steps, mesh.mesh.n_tde), dtype=float
     # )
     hdf_file_datasets.loading_rate = hdf_file.create_dataset(
-        "loading_rate", shape=(mesh.mesh.n_tde), dtype=float
+        "loading_rate",
+        shape=(mesh.mesh.n_tde),
+        dtype=float,
+        compression="gzip",
+    )
+    hdf_file_datasets.loading_rate = hdf_file.create_dataset(
+        "location_probability",
+        shape=(params.n_time_steps, mesh.mesh.n_tde),,
+        dtype=float,
+        compression="gzip",
     )
     return hdf_file, hdf_file_datasets
 
@@ -2193,12 +2204,18 @@ def time_step_loop(params, time_series, mesh):
             event.mesh_last_event_slip = mesh.mesh_last_event_slip
             event.mesh_total_slip = mesh.mesh_total_slip
 
+            # TODO: Should event.location_probability be calculated outside of if event occurs?
+            # This would be computationally wasteful but probably useful for debugging and visualziation.
+            event.location_probability = np.zeros_like(event.mesh_total_slip)
+
         # TODO: Check this???
         event.mesh_initial_dip_slip_deficit = mesh.mesh_initial_dip_slip_deficit
 
         # Save mesh values to HDF file
         hdf_file_datasets.cumulative_event_slip[i, :] = mesh.mesh_total_slip
         hdf_file_datasets.geometric_moment[i, :] = mesh.mesh_geometric_moment
+        hdf_file_datasets.location_probability[i, :] = event.location_probability
+        
         # hdf_file_datasets.loading_rate[i, :] = mesh.mesh_initial_dip_slip_deficit
 
         # Pre-event moment for next time step
