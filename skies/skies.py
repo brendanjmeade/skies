@@ -2060,9 +2060,13 @@ def time_step_loop(params, time_series, mesh):
         # it at every time step to understand (visuallly and quantitatively)
         # how the spatial probabilities evolve and if the tuning
         # parameters need to be adjusted.
+
         mesh_geometric_moment_pre_event_normalized = (
-            mesh.mesh_geometric_moment_pre_event
-            - np.min(mesh.mesh_geometric_moment_pre_event)
+            mesh.mesh_geometric_moment_pre_event / mesh.mesh.areas
+        )
+        mesh_geometric_moment_pre_event_normalized = (
+            mesh_geometric_moment_pre_event_normalized
+            - np.min(mesh_geometric_moment_pre_event_normalized)
         )
         mesh_geometric_moment_pre_event_normalized = (
             mesh_geometric_moment_pre_event_normalized
@@ -2080,6 +2084,9 @@ def time_step_loop(params, time_series, mesh):
                 params.location_probability_amplitude_scale_factor,
                 params.location_probability_data_scale_factor,
             )
+        # No earthquakes at first time step
+        if i == 1:
+            location_probability = np.zeros_like(location_probability)
 
         # Determine whether there is an event at this time step
         time_series.probability_weight[i] = get_tanh_probability(
@@ -2097,7 +2104,6 @@ def time_step_loop(params, time_series, mesh):
         )
 
         if bool(time_series.event_trigger_flag[i]):
-            # logger.info("\n\n\n----------> EVENT <----------\n\n\n")
             time_series.last_event_time = i
             event = addict.Dict()
             event.location_probability = location_probability
@@ -2113,27 +2119,6 @@ def time_step_loop(params, time_series, mesh):
             time_series.event_magnitude[i] = event.moment_magnitude[0]
 
             # Find event initialization triangle
-            # mesh_geometric_moment_pre_event_normalized = (
-            #     mesh.mesh_geometric_moment_pre_event
-            #     - np.min(mesh.mesh_geometric_moment_pre_event)
-            # )
-            # mesh_geometric_moment_pre_event_normalized = (
-            #     mesh_geometric_moment_pre_event_normalized
-            #     / np.max(mesh_geometric_moment_pre_event_normalized)
-            # )
-            # if params.geometric_moment_nucleation_probability == "high":
-            #     event.location_probability = get_tanh_probability_vector(
-            #         mesh_geometric_moment_pre_event_normalized,
-            #         params.location_probability_amplitude_scale_factor,
-            #         params.location_probability_data_scale_factor,
-            #     )
-            # elif params.geometric_moment_nucleation_probability == "low":
-            #     event.location_probability = get_tanh_probability_vector(
-            #         1 - mesh_geometric_moment_pre_event_normalized,
-            #         params.location_probability_amplitude_scale_factor,
-            #         params.location_probability_data_scale_factor,
-            #     )
-
             event.hypocenter_triangle_index = np.random.choice(
                 mesh.mesh.n_tde, 1, p=event.location_probability
             )[0]
