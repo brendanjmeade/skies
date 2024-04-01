@@ -1886,7 +1886,8 @@ def get_params(params_file_name):
     params.file_name = params_file_name
 
     # Add run_name and output_path
-    params.run_name = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    # params.run_name = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    params.run_name = uuid.uuid4().hex    
     params.output_path = os.path.join(params.base_runs_folder, params.run_name)
     params.output_folder = os.path.join(params.base_runs_folder, params.run_name)
 
