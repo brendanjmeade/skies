@@ -18,6 +18,7 @@ dependencies:
   - addict
   - tqdm
   - h5py
+  - plotly
   - colorcet
   - cmcrameri
   - lxml
