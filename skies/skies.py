@@ -2085,9 +2085,9 @@ def time_step_loop(params, time_series, mesh):
                 params.location_probability_amplitude_scale_factor,
                 params.location_probability_data_scale_factor,
             )
-        # No earthquakes at first time step
-        if i == 1:
-            location_probability = np.zeros_like(location_probability)
+
+        # Set any nans to zero
+        location_probability[np.isnan(location_probability)] = 0.0
 
         # Determine whether there is an event at this time step
         time_series.probability_weight[i] = get_tanh_probability(
