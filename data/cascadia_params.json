@@ -2,7 +2,7 @@
     "area_scaling": 1.25,
     "b_value": -1,
     "default_omori_decay_time": 100,
-    "geometic_moment_rate_scale_factor": 50,
+    "geometric_moment_rate_scale_factor": 50,
     "initial_mesh_slip_deficit_scaling": 0,
     "initial_slip_deficit_rate_file": "./data/cascadia_low_resolution_tde_dip_slip_rates.npy",
     "location_probability_amplitude_scale_factor": 1,
