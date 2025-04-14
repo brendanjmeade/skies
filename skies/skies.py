@@ -112,6 +112,8 @@ def suppress_stdout():
 
 # Read mesh data - List of dictionaries version
 def read_meshes(mesh_parameters_file_name):
+    #     mesh.points = meshobj.points
+    # mesh.verts = meshio.CellBlock("triangle", meshobj.get_cells_type("triangle")).data
     meshes = []
     if mesh_parameters_file_name != "":
         with open(mesh_parameters_file_name) as f:
@@ -129,7 +131,7 @@ def read_meshes(mesh_parameters_file_name):
 
                 meshes[i].file_name = mesh_param[i]["mesh_filename"]
                 meshes[i].verts = meshes[i].meshio_object.get_cells_type("triangle")
-
+                meshes[i].points = meshes[i].meshio_object.points
                 # Expand mesh coordinates
                 meshes[i].lon1 = meshes[i].meshio_object.points[
                     meshes[i].verts[:, 0], 0
@@ -1472,6 +1474,41 @@ def quick_plot_mode(mesh, fill_value, params):
     plt.gca().set_aspect("equal", adjustable="box")
 
 
+def add_dataset(output_file_name, dataset_name, dataset):
+    with h5py.File(output_file_name, "r+") as hdf:
+        # Handle the case where dataset_name starts with '/'
+        parts = dataset_name.strip("/").split("/")
+        current_path = ""
+
+        # Create groups for each level of the path
+        for part in parts[:-1]:
+            if not part:  # Skip empty parts
+                continue
+
+            if current_path:
+                current_path = current_path + "/" + part
+            else:
+                current_path = part
+
+            # If this path exists and is a Dataset, delete it
+            if current_path in hdf and isinstance(hdf[current_path], h5py.Dataset):
+                del hdf[current_path]
+
+            # Create group if it doesn't exist
+            if current_path not in hdf:
+                try:
+                    hdf.create_group(current_path)
+                except ValueError as e:
+                    raise
+
+        # Now handle the final dataset
+        if dataset_name in hdf:
+            del hdf[dataset_name]  # Remove the existing dataset
+
+        # Create the new dataset
+        hdf.create_dataset(dataset_name, data=dataset)
+
+
 # def get_geometric_moment_condition(event_geometric_moment, mesh_geometric_moment):
 #     # Case 1: Average geometric moment is grearter than zero
 #     if np.sum(mesh_geometric_moment) > 0:
@@ -1965,32 +2002,40 @@ def initialize_hdf(params, mesh):
     """
     # TODO: Add flag for file compression
     hdf_file_datasets = addict.Dict()
-    hdf_file_name = params.output_folder + "/" + params.run_name + ".hdf"
+    hdf_file_name = params.output_folder + "/" + params.run_name + ".hdf5"
     hdf_file = h5py.File(hdf_file_name, "w")
-    hdf_file_datasets.cumulative_event_slip = hdf_file.create_dataset(
-        "cumulative_slip",
-        shape=(params.n_time_steps, mesh.mesh.n_tde),
-        dtype=float,
-        # compression="gzip",
-    )
-    hdf_file_datasets.geometric_moment = hdf_file.create_dataset(
-        "geometric_moment",
-        shape=(params.n_time_steps, mesh.mesh.n_tde),
-        dtype=float,
-        # compression="gzip",
-    )
-    hdf_file_datasets.loading_rate = hdf_file.create_dataset(
-        "loading_rate",
-        shape=(mesh.mesh.n_tde),
-        dtype=float,
-        # compression="gzip",
-    )
-    hdf_file_datasets.location_probability = hdf_file.create_dataset(
-        "location_probability",
-        shape=(params.n_time_steps, mesh.mesh.n_tde),
-        dtype=float,
-        # compression="gzip",
-    )
+    # hdf_file_datasets.cumulative_event_slip = hdf_file.create_dataset(
+    #     "cumulative_slip",
+    #     shape=(params.n_time_steps, mesh.mesh.n_tde),
+    #     dtype=float,
+    #     # compression="gzip",
+    # )
+    # hdf_file_datasets.geometric_moment = hdf_file.create_dataset(
+    #     "geometric_moment",
+    #     shape=(params.n_time_steps, mesh.mesh.n_tde),
+    #     dtype=float,
+    #     # compression="gzip",
+    # )
+    # hdf_file_datasets.loading_rate = hdf_file.create_dataset(
+    #     "loading_rate",
+    #     shape=(mesh.mesh.n_tde),
+    #     dtype=float,
+    #     # compression="gzip",
+    # )
+    # hdf_file_datasets.location_probability = hdf_file.create_dataset(
+    #     "location_probability",
+    #     shape=(params.n_time_steps, mesh.mesh.n_tde),
+    #     dtype=float,
+    #     # compression="gzip",
+    # )
+
+    # hdf_file_datasets.location_probability = hdf_file.create_dataset(
+    #     "/meshes/mesh_00000",
+    #     shape=(params.n_time_steps, mesh.mesh.n_tde),
+    #     dtype=float,
+    #     # compression="gzip",
+    # )
+
     return hdf_file, hdf_file_datasets
 
 
@@ -2040,6 +2085,8 @@ def save_all(params, mesh, time_series):
 def time_step_loop(params, time_series, mesh):
     # Main time loop
     hdf_file, hdf_file_datasets = initialize_hdf(params, mesh)
+    hdf_output_file_name = params.output_folder + "/" + params.run_name + ".hdf5"
+
     start_time = datetime.datetime.now()
 
     for i in track(range(params.n_time_steps - 1), description="Event generation"):
@@ -2221,10 +2268,24 @@ def time_step_loop(params, time_series, mesh):
         event.mesh_initial_dip_slip_deficit = mesh.mesh_initial_dip_slip_deficit
 
         # Save mesh values to HDF file
-        hdf_file_datasets.cumulative_event_slip[i, :] = mesh.mesh_total_slip
-        hdf_file_datasets.geometric_moment[i, :] = mesh.mesh_geometric_moment
-        hdf_file_datasets.location_probability[i, :] = event.location_probability
+        # hdf_file_datasets.cumulative_event_slip[i, :] = mesh.mesh_total_slip
+        # hdf_file_datasets.geometric_moment[i, :] = mesh.mesh_geometric_moment
+        # hdf_file_datasets.location_probability[i, :] = event.location_probability
         # hdf_file_datasets.loading_rate[i, :] = mesh.mesh_initial_dip_slip_deficit
+
+        # Create parsli style hdf fields
+        # Fake names for parsli compatibility:
+        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/dip_slip/{i:012}", mesh.mesh_total_slip)
+        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/dip_slip_coupling/{i:012}", mesh.mesh_geometric_moment)
+        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/dip_slip_kinematic/{i:012}", event.location_probability)
+        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/strike_slip/{i:012}", mesh.mesh_initial_dip_slip_deficit)
+
+        # True names for understanding and clarity
+        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/mesh_total_slip/{i:012}", mesh.mesh_total_slip)
+        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/mesh_geometric_moment/{i:012}", mesh.mesh_geometric_moment)
+        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/location_probability/{i:012}", event.location_probability)
+        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/mesh_initial_slip_deficit/{i:012}", mesh.mesh_initial_dip_slip_deficit)
+
 
         # Pre-event moment for next time step
         mesh.mesh_geometric_moment_pre_event = np.copy(
@@ -2237,8 +2298,15 @@ def time_step_loop(params, time_series, mesh):
             + mesh.mesh_geometric_moment_scalar_non_zero[i]
         )
 
-    hdf_file_datasets.loading_rate = mesh.mesh_initial_dip_slip_deficit
-    hdf_file.close()
+    # Write mesh geometry and ancillary data to hdf file:
+    meshes = read_meshes(params.mesh_parameters_file_name)
+    add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/verts", meshes[0].verts)
+    add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/coordinates", meshes[0].meshio_object.points)
+    add_dataset(hdf_output_file_name, f"/earth_radius", 6371.0)
+
+
+    # hdf_file_datasets.loading_rate = mesh.mesh_initial_dip_slip_deficit
+    # hdf_file.close()
     end_time = datetime.datetime.now()
     logger.info(f"Event sequence generation run time: {(end_time - start_time)}")
     logger.info(
