@@ -2268,24 +2268,10 @@ def time_step_loop(params, time_series, mesh):
         event.mesh_initial_dip_slip_deficit = mesh.mesh_initial_dip_slip_deficit
 
         # Save mesh values to HDF file
-        # hdf_file_datasets.cumulative_event_slip[i, :] = mesh.mesh_total_slip
-        # hdf_file_datasets.geometric_moment[i, :] = mesh.mesh_geometric_moment
-        # hdf_file_datasets.location_probability[i, :] = event.location_probability
-        # hdf_file_datasets.loading_rate[i, :] = mesh.mesh_initial_dip_slip_deficit
-
-        # Create parsli style hdf fields
-        # Fake names for parsli compatibility:
-        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/dip_slip/{i:012}", mesh.mesh_total_slip)
-        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/dip_slip_coupling/{i:012}", mesh.mesh_geometric_moment)
-        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/dip_slip_kinematic/{i:012}", event.location_probability)
-        add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/strike_slip/{i:012}", mesh.mesh_initial_dip_slip_deficit)
-
-        # True names for understanding and clarity
         add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/mesh_total_slip/{i:012}", mesh.mesh_total_slip)
         add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/mesh_geometric_moment/{i:012}", mesh.mesh_geometric_moment)
         add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/location_probability/{i:012}", event.location_probability)
         add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/mesh_initial_slip_deficit/{i:012}", mesh.mesh_initial_dip_slip_deficit)
-
 
         # Pre-event moment for next time step
         mesh.mesh_geometric_moment_pre_event = np.copy(
