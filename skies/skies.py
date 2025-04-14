@@ -2073,13 +2073,14 @@ def time_step_loop(params, time_series, mesh):
             mesh_geometric_moment_pre_event_normalized
             / np.max(mesh_geometric_moment_pre_event_normalized)
         )
+
         if params.geometric_moment_nucleation_probability == "high":
             location_probability = get_tanh_probability_vector(
                 mesh_geometric_moment_pre_event_normalized,
                 params.location_probability_amplitude_scale_factor,
                 params.location_probability_data_scale_factor,
             )
-        elif params.geometric_moment_nucleation_probability == "low":
+        else: # params.geometric_moment_nucleation_probability == "low":
             location_probability = get_tanh_probability_vector(
                 1 - mesh_geometric_moment_pre_event_normalized,
                 params.location_probability_amplitude_scale_factor,
