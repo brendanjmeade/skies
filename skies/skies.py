@@ -2286,6 +2286,7 @@ def time_step_loop(params, time_series, mesh):
 
     # Write mesh geometry and ancillary data to hdf file:
     meshes = read_meshes(params.mesh_parameters_file_name)
+    add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/n_time_steps", params.n_time_steps - 1)
     add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/verts", meshes[0].verts)
     add_dataset(hdf_output_file_name, f"/meshes/mesh_00000/coordinates", meshes[0].meshio_object.points)
     add_dataset(hdf_output_file_name, f"/earth_radius", 6371.0)
